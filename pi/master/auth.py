@@ -1,4 +1,5 @@
-from flask_restful import reqparse, abort, Resource
+from flask_restful import reqparse, abort, Resource, Api
+from master import app
 
 parser = reqparse.RequestParser()
 parser.add_argument('username')
@@ -16,3 +17,7 @@ class Auth(Resource):
         new_user = args['username']
         auth_failure(new_user)
         return {'username': new_user, 'encrypt_key': 'key_value'}, 201
+
+
+api = Api(app)
+api.add_resource(Auth, '/auth')
