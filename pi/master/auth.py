@@ -15,6 +15,4 @@ class Auth(Resource):
         args = parser.parse_args()
         new_user = args['username']
         auth_failure(new_user)
-        return {
-            'username': new_user,
-            'encrypt_key': 'key_value'}, 201
+        return {'username': new_user, 'encrypt_key': 'key_value'}, 201
