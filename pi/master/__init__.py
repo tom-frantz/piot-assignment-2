@@ -7,7 +7,3 @@ import master.home
 import master.register
 import master.auth
 import master.logout
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
