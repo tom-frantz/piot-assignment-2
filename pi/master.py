@@ -1,9 +1,9 @@
 from flask import Flask
 from flask_restful import Api
-from pi.agent.test import Home as Home
-from pi.agent.register import Register as Register
-from pi.agent.auth import Auth as Auth
-from pi.agent.logout import Logout as Logout
+from pi.agent import Home as Home
+from pi.agent import Register as Register
+from pi.agent import Auth as Auth
+from pi.agent import Logout as Logout
 
 app = Flask(__name__)
 api = Api(app)
