@@ -12,5 +12,6 @@ class Logout(Resource):
         new_user = args['username']
         return {'message': "user logged out."}
 
+
 api = Api(app)
 api.add_resource(Logout, '/logout')

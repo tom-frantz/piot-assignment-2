@@ -5,7 +5,7 @@
 - Environment variable settings for development:
 
   ```
-  export FLASK_APP=master
+  export FLASK_APP=master_pi.py
   export FLASK_ENV=development
   ```
 

@@ -2,7 +2,7 @@ from flask import Flask
 
 app = Flask(__name__)
 
-# import of route modules must come after the application instance
+# Import of route modules must come after the application object is created
 import master.home
 import master.register
 import master.auth

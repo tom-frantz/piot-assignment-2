@@ -18,5 +18,6 @@ class Auth(Resource):
         auth_failure(new_user)
         return {'username': new_user, 'encrypt_key': 'key_value'}, 201
 
+
 api = Api(app)
 api.add_resource(Auth, '/auth')
