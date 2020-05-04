@@ -10,6 +10,9 @@ autopep8 = "*"
 flask = "*"
 flask-restful = "*"
 master = {editable = true,path = "."}
+passlib = "*"
+flask-jwt-extended = "*"
+pymysql = "*"
 
 [requires]
 python_version = "3.8"

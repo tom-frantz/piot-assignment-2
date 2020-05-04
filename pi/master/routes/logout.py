@@ -1,5 +1,5 @@
-from flask_restful import reqparse, abort, Resource, Api
-from master import app
+from flask_restful import reqparse, abort, Resource
+from master import app, api
 
 parser = reqparse.RequestParser()
 parser.add_argument('username')
@@ -13,5 +13,4 @@ class Logout(Resource):
         return {'message': "user logged out."}
 
 
-api = Api(app)
 api.add_resource(Logout, '/logout')
