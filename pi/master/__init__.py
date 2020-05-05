@@ -8,8 +8,9 @@ import os
 app = Flask(__name__)
 #app.config.from_object('config.Config')
 
+secret_key = os.environ["My_SQL"]
 # 'sqlite:///./car_share.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:lucy0222@127.0.0.1:3306/CarShare' 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:{}@127.0.0.1:3306/CarShare'.format(secret_key) 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 # app.config['SECRET_KEY'] = '1234567' # os.environ['MY_SQL']
