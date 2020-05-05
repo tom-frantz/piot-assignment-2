@@ -6,12 +6,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from master.models import users
 #import sys
 
-parser = reqparse.RequestParser(bundle_errors=True)
-parser.add_argument('username', required=True)
+parser = reqparse.RequestParser()
+parser.add_argument('car_number', required=True)
 parser.add_argument('password', required=True)
-parser.add_argument('first_name', required=True)
-parser.add_argument('last_name', required=True)
-parser.add_argument('email', required=True )
 username = ['a', 'b', 'c']
 
 
@@ -31,9 +28,6 @@ class Register(Resource):
         args = parser.parse_args()
         username = args['username']
         password = args['password']
-        first_name = args['first_name']
-        last_name = args['last_name']
-        email = args['email']
 
         check_duplicate_user(username)
         
@@ -44,10 +38,7 @@ class Register(Resource):
         # database new record
         new_user = users.UserModel(
             username = username,
-            password = hashed_password,
-            first_name = first_name,
-            last_name = last_name,
-            email = email
+            password = hashed_password
             )
         try:
             new_user.add_new_record()
@@ -68,10 +59,7 @@ class Profile(Resource):
         print(current_user)
         try:
             result = users.UserModel.query.filter_by(username=current_user).first()
-            return {'username': result.username,
-                'first_name': result.first_name,
-                'last_name': result.last_name,
-                'email': result.email}
+            return {'username': result.username}
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {"Error": error}, 500

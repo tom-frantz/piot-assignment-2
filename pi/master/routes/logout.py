@@ -5,7 +5,7 @@ parser = reqparse.RequestParser()
 parser.add_argument('username')
 username = ['a', 'b', 'c']
 
-
+#TODO: a blacklist for tokens from last login session
 class Logout(Resource):
     def post(self):
         args = parser.parse_args()
