@@ -7,6 +7,7 @@ import Login from "./screens/Login";
 import Cars from "./screens/Cars";
 import Navbar from "./containers/Navbar";
 import PrivateRoute from "./containers/PrivateRoute";
+import Register from "./screens/Register";
 
 const { Content, Header, Footer } = Layout;
 
@@ -21,13 +22,16 @@ function AppNavigator() {
                 <Header>
                     <Navbar auth={auth} />
                 </Header>
-                <Content style={{ display: "flex", flexGrow: 1 }}>
+                <Content style={{ display: "flex", flexGrow: 1, justifyContent: "center" }}>
                     <Switch>
                         <Route path={"/"} exact>
                             <Login setAuth={setAuth} />
                         </Route>
                         <Route path={"/login"} exact>
                             <Login setAuth={setAuth} />
+                        </Route>
+                        <Route path={"/register"} exact>
+                            <Register />
                         </Route>
                         <PrivateRoute auth={auth} path={"/cars"} exact>
                             <Cars />
