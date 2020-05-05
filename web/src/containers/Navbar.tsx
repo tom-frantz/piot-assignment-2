@@ -3,19 +3,15 @@ import { Link, withRouter } from "react-router-dom";
 import { Menu } from "antd";
 
 interface NavbarProps {
-    location: {
-        pathname: string;
-    };
+    auth?: string;
 }
 
 const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
-    const {
-        location: { pathname },
-    } = props;
+    const { auth } = props;
 
     return (
         <Menu theme="dark" mode="horizontal">
-            {(pathname !== "/" || true) && [
+            {auth && [
                 <Menu.Item key="/cars">
                     <Link to={"/cars"}>Cars</Link>
                 </Menu.Item>,
@@ -25,4 +21,4 @@ const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
     );
 };
 
-export default withRouter((props) => <Navbar {...props} />);
+export default Navbar;

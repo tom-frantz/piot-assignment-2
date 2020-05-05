@@ -1,6 +1,8 @@
 import React from "react";
 
-interface LoginProps {}
+interface LoginProps {
+    setAuth(auth: undefined | string): void;
+}
 
 const Login: React.FC<LoginProps> = (props: LoginProps) => {
     return null;

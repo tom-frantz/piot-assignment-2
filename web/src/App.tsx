@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "antd/dist/antd.css";
 import { Route, Router, Switch } from "react-router-dom";
 import { createBrowserHistory } from "history";
@@ -13,21 +13,23 @@ const { Content, Header, Footer } = Layout;
 const history = createBrowserHistory();
 
 function AppNavigator() {
+    const [auth, setAuth] = useState<undefined | string>(undefined);
+
     return (
         <Router history={history}>
             <Layout style={{ height: "100vh" }}>
                 <Header>
-                    <Navbar />
+                    <Navbar auth={auth} />
                 </Header>
                 <Content style={{ display: "flex", flexGrow: 1 }}>
                     <Switch>
                         <Route path={"/"} exact>
-                            <Login />
+                            <Login setAuth={setAuth} />
                         </Route>
                         <Route path={"/login"} exact>
-                            <Login />
+                            <Login setAuth={setAuth} />
                         </Route>
-                        <PrivateRoute path={"/cars"} exact>
+                        <PrivateRoute auth={auth} path={"/cars"} exact>
                             <Cars />
                         </PrivateRoute>
                     </Switch>
