@@ -1,19 +1,26 @@
 import React from "react";
 import { Layout, Form, Input, Button } from "antd";
 
-const { Content } = Layout;
-
 interface RegisterProps {}
 
 const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
-    // username password firstname lastname email
     const [form] = Form.useForm();
 
-    const onFinish = (values: unknown) => {
-        console.log("Success:", values);
-        form.setFields([{ name: "username", errors: ["The username is already in use"] }]);
-
-        // TODO form
+    const onFinish = ({ username, first_name, last_name, email, password }: any) => {
+        fetch("http://127.0.0.1:5000/users/register", {
+            method: "POST",
+            body: JSON.stringify({
+                username,
+                first_name,
+                last_name,
+                email,
+                password,
+            }),
+            redirect: "follow",
+        })
+            .then((response: any) => response.json())
+            .then((result: any) => console.log(result))
+            .catch((error: any) => console.log("error", error));
     };
 
     return (
@@ -31,7 +38,7 @@ const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
             </Form.Item>
             <Form.Item
                 label={"First Name"}
-                name={"firstName"}
+                name={"first_name"}
                 rules={[
                     { required: true, message: "First Name is required" },
                     { min: 3, message: "Must be at least three characters long" },
@@ -42,7 +49,7 @@ const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
             </Form.Item>
             <Form.Item
                 label={"Last Name"}
-                name={"lastName"}
+                name={"last_name"}
                 rules={[
                     { required: true, message: "Last Name is required" },
                     { min: 3, message: "Must be at least three characters long" },
