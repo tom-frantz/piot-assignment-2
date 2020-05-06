@@ -17,6 +17,9 @@ const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
                 password,
             }),
             redirect: "follow",
+            headers: {
+                "Content-Type": "application/json",
+            },
         })
             .then((response: any) => response.json())
             .then((result: any) => console.log(result))
