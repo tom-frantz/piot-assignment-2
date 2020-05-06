@@ -1,5 +1,5 @@
 import React from "react";
-import { Layout, Form, Input } from "antd";
+import { Layout, Form, Input, Button } from "antd";
 
 const { Content } = Layout;
 
@@ -7,8 +7,17 @@ interface RegisterProps {}
 
 const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
     // username password firstname lastname email
+    const [form] = Form.useForm();
+
+    const onFinish = (values: unknown) => {
+        console.log("Success:", values);
+        form.setFields([{ name: "username", errors: ["The username is already in use"] }]);
+
+        // TODO form
+    };
+
     return (
-        <Form>
+        <Form form={form} onFinish={onFinish} style={{ padding: 13 }}>
             <Form.Item
                 label={"Username"}
                 name={"username"}
@@ -94,6 +103,11 @@ const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
                 ]}
             >
                 <Input />
+            </Form.Item>
+            <Form.Item>
+                <Button type="primary" htmlType="submit">
+                    Submit
+                </Button>
             </Form.Item>
         </Form>
     );
