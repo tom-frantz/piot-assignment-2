@@ -1,5 +1,11 @@
 from flask_restful import reqparse, abort, Resource
-from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required,jwt_refresh_token_required, get_jwt_identity)
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    jwt_required,
+    jwt_refresh_token_required,
+    get_jwt_identity,
+)
 from passlib.hash import pbkdf2_sha256 as sha256
 from sqlalchemy.exc import SQLAlchemyError
 from master import app, api, db
@@ -23,16 +29,18 @@ def check_user_exists(user):
         else:
             return result
     except SQLAlchemyError as e:
-            error = str(e.__dict__['orig'])
-            return {"Error": error}, 500
+        error = str(e.__dict__['orig'])
+        return {"Error": error}, 500
+
 
 def verify_password(password, hashed_password):
-    try: 
+    try:
         if not sha256.verify(password, hashed_password):
             abort(401, message='The password is wrong.')
     # when password is not a valid sha256 hashed value
     except ValueError:
-            abort(401, message='The password in database is not in the right format.')
+        abort(401, message='The password in database is not in the right format.')
+
 
 class AccessToken(Resource):
     def post(self):
@@ -44,17 +52,24 @@ class AccessToken(Resource):
 
         access_token = create_access_token(identity=username)
         refresh_token = create_refresh_token(identity=username)
-        return {'username': username, 
-            'access_token': access_token,
-            'refresh_token': refresh_token}, 201
+        return (
+            {
+                'username': username,
+                'access_token': access_token,
+                'refresh_token': refresh_token,
+            },
+            201,
+        )
+
 
 class TokenRefresh(Resource):
     @jwt_refresh_token_required
     def post(self):
-        current_user = get_jwt_identity() # extract identity from refresh token
+        current_user = get_jwt_identity()  # extract identity from refresh token
         check_user_exists(current_user)
-        access_token = create_access_token(identity = current_user)
+        access_token = create_access_token(identity=current_user)
         return {'access_token': access_token}, 201
+
 
 class ChangePassword(Resource):
     @jwt_required
@@ -74,11 +89,11 @@ class ChangePassword(Resource):
             db.session.commit()
             access_token = create_access_token(identity=result.username)
             refresh_token = create_refresh_token(identity=result.username)
-            return {'access_token': access_token,
-                "refresh_token": refresh_token}, 201
+            return {'access_token': access_token, "refresh_token": refresh_token}, 201
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {"Error": error}, 500
+
 
 api.add_resource(AccessToken, '/auth/new')
 api.add_resource(TokenRefresh, '/auth/refresh')

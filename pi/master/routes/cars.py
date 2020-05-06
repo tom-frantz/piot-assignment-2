@@ -1,10 +1,16 @@
 from flask_restful import reqparse, abort, Resource
 from passlib.hash import pbkdf2_sha256 as sha256
-from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, get_jwt_identity)
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    jwt_required,
+    get_jwt_identity,
+)
 from master import app, api
 from sqlalchemy.exc import SQLAlchemyError
 from master.models import users
-#import sys
+
+# import sys
 
 parser = reqparse.RequestParser()
 parser.add_argument('car_number', required=True)
@@ -18,7 +24,7 @@ def check_duplicate_user(user):
         if result is not None:
             abort(403, message="Username has already been taken.")
     except SQLAlchemyError as e:
-        #print("Error:", sys.exc_info()[0])
+        # print("Error:", sys.exc_info()[0])
         error = str(e.__dict__['orig'])
         return {'message': error}, 500
 
@@ -30,27 +36,27 @@ class Register(Resource):
         password = args['password']
 
         check_duplicate_user(username)
-        
+
         hashed_password = sha256.hash(password)
         access_token = create_access_token(identity=username)
         refresh_token = create_refresh_token(identity=username)
-        
+
         # database new record
-        new_user = users.UserModel(
-            username = username,
-            password = hashed_password
-            )
+        new_user = users.UserModel(username=username, password=hashed_password)
         try:
             new_user.add_new_record()
-            return {
-                'username': username, 
-                'access_token': access_token,
-                'refresh_token': refresh_token}, 201
+            return (
+                {
+                    'username': username,
+                    'access_token': access_token,
+                    'refresh_token': refresh_token,
+                },
+                201,
+            )
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
-        
 
 class Profile(Resource):
     @jwt_required
@@ -63,7 +69,6 @@ class Profile(Resource):
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {"Error": error}, 500
-
 
 
 api.add_resource(Register, '/users/register')
