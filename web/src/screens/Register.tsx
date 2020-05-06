@@ -55,7 +55,7 @@ const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
                 label={"Password"}
                 name={"password"}
                 rules={[
-                    { required: true, message: "Username is required" },
+                    { required: true, message: "Password is required" },
                     { min: 3, message: "Must be at least three characters long" },
                     { max: 15, message: "Must be at most 15 characters long" },
                 ]}
@@ -71,7 +71,7 @@ const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
                 rules={[
                     {
                         required: true,
-                        message: "Please confirm your password!",
+                        message: "Please confirm your password",
                     },
                     ({ getFieldValue }) => ({
                         validator(rule, value) {
