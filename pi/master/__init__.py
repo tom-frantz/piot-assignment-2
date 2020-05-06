@@ -2,8 +2,9 @@ from flask import Flask
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
-
+from flask_cors import CORS
 import os
+
 
 app = Flask(__name__)
 # app.config.from_object('config.Config')
@@ -21,14 +22,11 @@ app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
 # app.config['JWT_BLACKLIST_ENABLED'] = True
 # app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
+CORS(app)
 api = Api(app)
 jwt = JWTManager(app)
 
 db = SQLAlchemy(app)
-
-# @app.before_first_request
-# def create_tables():
-#     db.create_all()
 
 
 # Import of route modules must come after the application object is created
@@ -36,3 +34,6 @@ import master.routes.home
 import master.routes.users
 import master.routes.auth
 import master.routes.logout
+
+if __name__ == "__main__":
+    db.create_all()
