@@ -18,7 +18,6 @@ parser.add_argument('password', required=True)
 parser.add_argument('first_name', required=True)
 parser.add_argument('last_name', required=True)
 parser.add_argument('email', required=True)
-username = ['a', 'b', 'c']
 
 
 def check_duplicate_user(user):
@@ -28,7 +27,7 @@ def check_duplicate_user(user):
             abort(403, message="Username has already been taken.")
     except SQLAlchemyError as e:
         # print("Error:", sys.exc_info()[0])
-        error = str(e.__dict__['orig'])
+        error = str(e.__dict__['orig']).strip("\\")
         return {'message': error}, 500
 
 
@@ -66,7 +65,7 @@ class Register(Resource):
                 201,
             )
         except SQLAlchemyError as e:
-            error = str(e.__dict__['orig'])
+            error = str(e.__dict__['orig']).strip("\\")
             return {'message': error}, 500
 
 
@@ -76,7 +75,8 @@ class Profile(Resource):
         current_user = get_jwt_identity()
         print(current_user)
         try:
-            result = users.UserModel.query.filter_by(username=current_user).first()
+            result = users.UserModel.query.filter_by(
+                username=current_user).first()
             return {
                 'username': result.username,
                 'first_name': result.first_name,
@@ -84,7 +84,7 @@ class Profile(Resource):
                 'email': result.email,
             }
         except SQLAlchemyError as e:
-            error = str(e.__dict__['orig'])
+            error = str(e.__dict__['orig']).strip("\\")
             return {"Error": error}, 500
 
 

@@ -13,6 +13,7 @@ master = {editable = true,path = "."}
 passlib = "*"
 flask-jwt-extended = "*"
 pymysql = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.8"

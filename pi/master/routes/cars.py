@@ -1,75 +1,108 @@
 from flask_restful import reqparse, abort, Resource
-from passlib.hash import pbkdf2_sha256 as sha256
-from flask_jwt_extended import (
-    create_access_token,
-    create_refresh_token,
-    jwt_required,
-    get_jwt_identity,
-)
+from flask_jwt_extended import jwt_required
 from master import app, api
 from sqlalchemy.exc import SQLAlchemyError
-from master.models import users
+from master.models import cars
 
 # import sys
 
-parser = reqparse.RequestParser()
-parser.add_argument('car_number', required=True)
-parser.add_argument('password', required=True)
-username = ['a', 'b', 'c']
+parser_new = reqparse.RequestParser()
+parser_new.add_argument('car_number', required=True)
+parser_new.add_argument('seats', required=True)
+parser_new.add_argument('lock_status')
+parser_new.add_argument('available')
+
+# TODO: admin only
 
 
-def check_duplicate_user(user):
-    try:
-        result = users.UserModel.query.filter_by(username=user).first()
-        if result is not None:
-            abort(403, message="Username has already been taken.")
-    except SQLAlchemyError as e:
-        # print("Error:", sys.exc_info()[0])
-        error = str(e.__dict__['orig'])
-        return {'message': error}, 500
-
-
-class Register(Resource):
+class NewCar(Resource):
+    @jwt_required
     def post(self):
-        args = parser.parse_args()
-        username = args['username']
-        password = args['password']
+        args = parser_new.parse_args()
+        car_number = args['car_number']
+        seats = args['seats']
 
-        check_duplicate_user(username)
+        # optional request arguments
+        lock_status = True
+        available = True
 
-        hashed_password = sha256.hash(password)
-        access_token = create_access_token(identity=username)
-        refresh_token = create_refresh_token(identity=username)
+        if args['lock_status'] is not None:
+            lock_status = args['lock_status']
 
-        # database new record
-        new_user = users.UserModel(username=username, password=hashed_password)
+        if args['available'] is not None:
+            lock_status = args['available']
+
+        new_car = cars.CarModel(
+            car_number=car_number,
+            seats=seats,
+            lock_status=lock_status,
+            available=available
+        )
+
         try:
-            new_user.add_new_record()
-            return (
-                {
-                    'username': username,
-                    'access_token': access_token,
-                    'refresh_token': refresh_token,
-                },
-                201,
-            )
+            new_car.save_to_db()
+            return ({'car_number': car_number,
+                     'seats': seats,
+                     'lock_status': lock_status,
+                     'available': available
+                     })
         except SQLAlchemyError as e:
-            error = str(e.__dict__['orig'])
+            error = str(e.__dict__['orig']).strip("\\")
+            return {'message': error}, 500
+
+        return ({"message": "API for adding a new car."})
+
+
+class CarDetail(Resource):
+    @jwt_required
+    def get(self, car_number):
+        try:
+            result = cars.CarModel.query.filter_by(
+                car_number=car_number).first()
+            return ({"car_number": result.car_number,
+                     "seats": result.seats,
+                     "lock_status": result.lock_status,
+                     "available": result.available}, 200)
+
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig']).strip("\\")
             return {'message': error}, 500
 
 
-class Profile(Resource):
+class AvailableCars(Resource):
     @jwt_required
     def get(self):
-        current_user = get_jwt_identity()
-        print(current_user)
         try:
-            result = users.UserModel.query.filter_by(username=current_user).first()
-            return {'username': result.username}
+            result = cars.CarModel.query.filter_by(available=True).all()
+
+            available_cars = list(map(lambda item: {
+                "car_number": item.car_number,
+                "seats": item.seats}, result))
+            return available_cars, 200
+
         except SQLAlchemyError as e:
-            error = str(e.__dict__['orig'])
-            return {"Error": error}, 500
+            error = str(e.__dict__['orig']).strip("\\")
+            return {'message': error}, 500
 
 
-api.add_resource(Register, '/users/register')
-api.add_resource(Profile, '/users/me')
+class SearchCarBySeats(Resource):
+    @jwt_required
+    def get(self, seats):
+
+        try:
+            result = cars.CarModel.query.filter_by(seats=seats).all()
+            filtered_cars = list(map(lambda item: {
+                "car_number": item.car_number,
+                "seats": item.seats,
+                "lock_status": item.lock_status,
+                "avaialble": item.available}, result))
+            return filtered_cars, 200
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig']).strip("\\")
+            return {'message': error}, 500
+
+
+api.add_resource(NewCar, '/cars/new')
+api.add_resource(CarDetail, '/cars/detail/<string:car_number>')
+api.add_resource(AvailableCars, '/cars/available')
+api.add_resource(SearchCarBySeats, '/cars/seats/<int:seats>')

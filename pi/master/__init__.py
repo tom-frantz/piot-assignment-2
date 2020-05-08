@@ -34,6 +34,9 @@ import master.routes.home
 import master.routes.users
 import master.routes.auth
 import master.routes.logout
+import master.routes.cars
+import master.routes.bookings
 
-if __name__ == "__main__":
+@app.before_first_request
+def create_tables():
     db.create_all()

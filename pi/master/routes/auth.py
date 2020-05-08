@@ -29,7 +29,7 @@ def check_user_exists(user):
         else:
             return result
     except SQLAlchemyError as e:
-        error = str(e.__dict__['orig'])
+        error = str(e.__dict__['orig']).strip("\\")
         return {"Error": error}, 500
 
 
@@ -91,7 +91,7 @@ class ChangePassword(Resource):
             refresh_token = create_refresh_token(identity=result.username)
             return {'access_token': access_token, "refresh_token": refresh_token}, 201
         except SQLAlchemyError as e:
-            error = str(e.__dict__['orig'])
+            error = str(e.__dict__['orig']).strip("\\")
             return {"Error": error}, 500
 
 
