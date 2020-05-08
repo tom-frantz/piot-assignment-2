@@ -47,7 +47,7 @@ class NewCar(Resource):
                      'available': available
                      })
         except SQLAlchemyError as e:
-            error = str(e.__dict__['orig']).strip("\\")
+            error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
         return ({"message": "API for adding a new car."})
@@ -65,7 +65,7 @@ class CarDetail(Resource):
                      "available": result.available}, 200)
 
         except SQLAlchemyError as e:
-            error = str(e.__dict__['orig']).strip("\\")
+            error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
 
@@ -81,7 +81,7 @@ class AvailableCars(Resource):
             return available_cars, 200
 
         except SQLAlchemyError as e:
-            error = str(e.__dict__['orig']).strip("\\")
+            error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
 
@@ -98,7 +98,7 @@ class SearchCarBySeats(Resource):
                 "avaialble": item.available}, result))
             return filtered_cars, 200
         except SQLAlchemyError as e:
-            error = str(e.__dict__['orig']).strip("\\")
+            error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
 

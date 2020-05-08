@@ -9,6 +9,8 @@ class CarModel(db.Model):
     lock_status = db.Column(db.Boolean, nullable=False, default=True)
     available = db.Column(db.Boolean, nullable=False, default= True)
 
+    bookings = db.relationship('BookingModel', backref='Cars', lazy=True)
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

@@ -27,7 +27,7 @@ def check_duplicate_user(user):
             abort(403, message="Username has already been taken.")
     except SQLAlchemyError as e:
         # print("Error:", sys.exc_info()[0])
-        error = str(e.__dict__['orig']).strip("\\")
+        error = str(e.__dict__['orig'])
         return {'message': error}, 500
 
 
@@ -65,7 +65,7 @@ class Register(Resource):
                 201,
             )
         except SQLAlchemyError as e:
-            error = str(e.__dict__['orig']).strip("\\")
+            error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
 
@@ -84,7 +84,7 @@ class Profile(Resource):
                 'email': result.email,
             }
         except SQLAlchemyError as e:
-            error = str(e.__dict__['orig']).strip("\\")
+            error = str(e.__dict__['orig'])
             return {"Error": error}, 500
 
 
