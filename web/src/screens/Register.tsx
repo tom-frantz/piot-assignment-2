@@ -1,29 +1,37 @@
-import React from "react";
+import React, { SetStateAction } from "react";
 import { Layout, Form, Input, Button } from "antd";
+import axios from "axios";
+import { Auth } from "../App";
 
-interface RegisterProps {}
+interface RegisterProps {
+    setAuth(authValue: undefined | Partial<Auth>): void;
+}
 
 const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
     const [form] = Form.useForm();
 
     const onFinish = ({ username, first_name, last_name, email, password }: any) => {
-        fetch("http://127.0.0.1:5000/users/register", {
-            method: "POST",
-            body: JSON.stringify({
+        axios
+            .post("http://127.0.0.1:5000/users/register", {
                 username,
                 first_name,
                 last_name,
                 email,
                 password,
-            }),
-            redirect: "follow",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-            .then((response: any) => response.json())
-            .then((result: any) => console.log(result))
-            .catch((error: any) => console.log("error", error));
+            })
+            .then((result) => {
+                console.log("RESU", result);
+
+                props.setAuth({
+                    access_token: result.data.access_token,
+                    refresh_token: result.data.refresh_token,
+                });
+            })
+            .catch((error) => {
+                if (error.response.data.message) {
+                    form.setFields([{ name: "username", errors: [error.response.data.message] }]);
+                }
+            });
     };
 
     return (

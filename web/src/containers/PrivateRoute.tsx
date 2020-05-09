@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Redirect, RouteProps } from "react-router-dom";
 
 interface PrivateRouteProps extends RouteProps {
-    auth: undefined | string;
+    auth: boolean;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({
@@ -14,7 +14,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
         <Route
             {...rest}
             render={() =>
-                auth !== undefined ? (
+                auth ? (
                     children
                 ) : (
                     <Redirect

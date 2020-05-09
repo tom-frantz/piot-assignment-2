@@ -3,7 +3,7 @@ import { Link, withRouter } from "react-router-dom";
 import { Menu } from "antd";
 
 interface NavbarProps {
-    auth?: string;
+    auth: boolean;
 }
 
 const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
