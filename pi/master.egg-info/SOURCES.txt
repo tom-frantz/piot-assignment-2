@@ -3,7 +3,7 @@ master/__init__.py
 master/auth.py
 master/home.py
 master/logout.py
-master/register.py
+master/users.py
 master.egg-info/PKG-INFO
 master.egg-info/SOURCES.txt
 master.egg-info/dependency_links.txt

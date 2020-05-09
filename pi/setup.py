@@ -6,7 +6,5 @@ setup(
     name='master',
     packages=['master'],
     include_package_data=True,
-    install_requires=[
-        'flask',
-    ],
+    install_requires=['flask',],
 )
