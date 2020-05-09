@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import "antd/dist/antd.css";
-import { Route, Router, Switch } from "react-router-dom";
+import { Route, Router, Switch, Redirect } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import { Layout } from "antd";
 import axios from "axios";
@@ -98,7 +98,7 @@ function AppNavigator() {
                 <Content style={{ display: "flex", flexGrow: 1, justifyContent: "center" }}>
                     <Switch>
                         <Route path={"/"} exact>
-                            <Login setAuth={setAuth} />
+                            {auth ? <Redirect to={"/cars"} /> : <Redirect to={"/login"} />}
                         </Route>
                         <Route path={"/login"} exact>
                             <Login setAuth={setAuth} />

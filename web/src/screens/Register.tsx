@@ -2,8 +2,9 @@ import React, { SetStateAction } from "react";
 import { Layout, Form, Input, Button } from "antd";
 import axios from "axios";
 import { Auth } from "../App";
+import { withRouter, RouteComponentProps } from "react-router-dom";
 
-interface RegisterProps {
+interface RegisterProps extends RouteComponentProps<{}> {
     setAuth(authValue: undefined | Partial<Auth>): void;
 }
 
@@ -26,6 +27,7 @@ const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
                     access_token: result.data.access_token,
                     refresh_token: result.data.refresh_token,
                 });
+                props.history.push("/cars");
             })
             .catch((error) => {
                 if (error.response.data.message) {
@@ -131,4 +133,4 @@ const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
     );
 };
 
-export default Register;
+export default withRouter(Register);
