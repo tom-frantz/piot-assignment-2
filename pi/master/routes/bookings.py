@@ -1,4 +1,4 @@
-from flask_restful import reqparse, abort, Resource
+from flask_restful import reqparse, abort, Resource, inputs
 from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity,
@@ -8,15 +8,21 @@ from sqlalchemy.exc import SQLAlchemyError
 from master.models import bookings, cars
 
 parser_new = reqparse.RequestParser()
-parser_new.add_argument('car_number', required=True)
+parser_new.add_argument('car_number', type = inputs.regex('^[A-Za-z0-9]{1,6}$'), required=True)
+
+# "2013-01-01T06:00/2013-01-01T12:00" -> datetime(2013, 1, 1, 6), datetime(2013, 1, 1, 12)
+# A tuple of depature and return time in iso8601 format
+parser_new.add_argument('booking_period', type=inputs.iso8601interval)
 
 parser_cancel = reqparse.RequestParser()
-parser_cancel.add_argument('booking_id', required=True)
+parser_cancel.add_argument('booking_id', type = inputs.positive, required=True)
 
 def check_and_book(car_number):
     try:
         result = cars.CarModel.query.filter_by(car_number=car_number).first()
-        if not result.available:
+        if result is None:
+            abort(500, message="Car {} doesn't exisit.".format(car_number))
+        elif not result.available:
             abort(403, message='The car has already been booked.')
         else:
             result.available=False
@@ -50,19 +56,25 @@ class NewBooking(Resource):
 
         args = parser_new.parse_args()
         car_number = args['car_number']
+        car_number = car_number.upper()
+        booking_period = args['booking_period']
+        departure_time = booking_period[0]
+        return_time = booking_period[1]
 
         check_and_book(car_number)
 
         new_booking = bookings.BookingModel(
             car_number=car_number,
-            username=current_user
+            username=current_user,
+            departure_time = departure_time,
+            return_time = return_time
         )
 
         try:
 
             new_booking.save_to_db()
             return {
-                'message': "Your booking for car {} has been successfully created.".format(car_number)
+                'message': "Your booking (id: {}) for car {} has been successfully created.".format(new_booking.booking_id, car_number)
             }
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])

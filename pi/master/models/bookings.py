@@ -13,6 +13,8 @@ class BookingModel(db.Model):
         'Cars.car_number'), nullable=False)
     username = db.Column(db.String(100), db.ForeignKey(
         'Users.username'), nullable=False)
+    departure_time = db.Column(db.DateTime, nullable=False)
+    return_time = db.Column(db.DateTime, nullable=False)
     # booking status: active=true, canceled=false
     active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False,

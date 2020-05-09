@@ -1,4 +1,4 @@
-from flask_restful import reqparse, abort, Resource
+from flask_restful import reqparse, abort, Resource, inputs
 from passlib.hash import pbkdf2_sha256 as sha256
 from flask_jwt_extended import (
     create_access_token,
@@ -13,11 +13,11 @@ from master.models import users
 # import sys
 
 parser = reqparse.RequestParser(bundle_errors=True)
-parser.add_argument('username', required=True)
-parser.add_argument('password', required=True)
-parser.add_argument('first_name', required=True)
-parser.add_argument('last_name', required=True)
-parser.add_argument('email', required=True)
+parser.add_argument('username', type=inputs.regex('^[A-Za-z0-9-_]{3,15}$'), required=True)
+parser.add_argument('password', type=inputs.regex('^[A-Za-z0-9]{8,30}$'), required=True)
+parser.add_argument('first_name', type=inputs.regex('^[A-Za-z0-9-_]{1,30}$'), required=True)
+parser.add_argument('last_name', type=inputs.regex('^[A-Za-z0-9-_]{1,30}$'), required=True)
+parser.add_argument('email', type=inputs.regex('^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$'), required=True)
 
 
 def check_duplicate_user(user):

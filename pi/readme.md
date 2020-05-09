@@ -15,9 +15,11 @@
   Make sure your MySQL server process `mysqld` is running.
 
   ```
+  cd {project_root_folder}/pi
   pipenv install
   pipenv shell
   flask run
   ```
   
 - Default port: `5000`
+
