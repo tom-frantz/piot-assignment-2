@@ -26,7 +26,6 @@ def check_duplicate_user(user):
         if result is not None:
             abort(403, message="Username has already been taken.")
     except SQLAlchemyError as e:
-        # print("Error:", sys.exc_info()[0])
         error = str(e.__dict__['orig'])
         return {'message': error}, 500
 
@@ -73,7 +72,6 @@ class Profile(Resource):
     @jwt_required
     def get(self):
         current_user = get_jwt_identity()
-        print(current_user)
         try:
             result = users.UserModel.query.filter_by(
                 username=current_user).first()
