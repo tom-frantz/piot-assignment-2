@@ -1,11 +1,11 @@
 import React, { SetStateAction, useEffect } from "react";
 import { Button, Form, Input } from "antd";
-import { Auth } from "../App";
+import { Auth, getAuthTimer } from "../App";
 import axios from "axios";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 
 interface LoginProps extends RouteComponentProps<{}> {
-    setAuth(authValue: undefined | Partial<Auth>): void;
+    setAuth(authValue: Auth): void;
 }
 
 const Login: React.FC<LoginProps> = (props: LoginProps) => {
@@ -18,6 +18,7 @@ const Login: React.FC<LoginProps> = (props: LoginProps) => {
                 props.setAuth({
                     access_token: res.data.access_token,
                     refresh_token: res.data.refresh_token,
+                    timeout: getAuthTimer(),
                 });
                 props.history.push("/cars");
             })

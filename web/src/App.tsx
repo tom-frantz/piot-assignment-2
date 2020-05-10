@@ -15,24 +15,31 @@ const { Content, Header, Footer } = Layout;
 
 const history = createBrowserHistory();
 
-const getTimer = () => {
+export const getAuthTimer = () => {
     return Math.floor(new Date().getTime() / 1000) + (15 * 60 - 1);
 };
 
-export type Auth = { access_token: string; refresh_token: string };
+type FullAuth = { access_token: string; refresh_token: string; timeout: number };
+
+export type Auth = FullAuth | { refresh_token: string } | undefined;
 
 function AppNavigator() {
-    const [auth, setAuthFunction] = useState<undefined | Auth>(undefined);
-    const [timeout, setTimeoutFunc] = useState<undefined | number>(undefined);
+    const [auth, setAuthFn] = useState<Auth>(undefined);
+
+    const setAuth = (auth: Auth) => {
+        if (auth && auth.refresh_token) {
+            localStorage.setItem("refresh_token", auth.refresh_token);
+        }
+
+        setAuthFn(auth);
+    };
 
     useEffect(() => {
         const interceptor = axios.interceptors.request.use(async (config) => {
             if (auth === undefined) return config;
 
             let accessToken = undefined;
-
-            if (timeout && Math.round(new Date().getTime() / 1000) >= timeout) {
-                console.log("WE DOING THE REDO THING");
+            if (!("timeout" in auth) || Math.round(new Date().getTime() / 1000) >= auth.timeout) {
                 const res = await axios
                     .create()
                     .post(
@@ -42,23 +49,24 @@ function AppNavigator() {
                     );
 
                 if (res.data.access_token) {
-                    setAuth({ access_token: res.data.access_token });
+                    setAuth({
+                        refresh_token: auth.refresh_token,
+                        access_token: res.data.access_token,
+                        timeout: getAuthTimer(),
+                    });
                     accessToken = res.data.access_token;
-                    setTimeoutFunc(getTimer);
                 } else {
                     console.warn(res);
                     setAuth(undefined);
-                    setTimeoutFunc(undefined);
-                    return Promise.reject("Uh oh");
+                    return Promise.reject("You must log in again.");
                 }
             } else {
                 console.log("No need for redo");
             }
 
-            if (accessToken === undefined) accessToken = auth.access_token;
+            if (accessToken === undefined) accessToken = (auth as FullAuth).access_token;
 
-            if (accessToken !== undefined)
-                config.headers.Authorization = `Bearer ${auth.access_token}`;
+            if (accessToken !== undefined) config.headers.Authorization = `Bearer ${accessToken}`;
 
             return config;
         });
@@ -68,26 +76,12 @@ function AppNavigator() {
         };
     });
 
-    const setAuth = (authValue: Partial<Auth> | undefined) => {
-        if (authValue === undefined) {
-            setTimeoutFunc(undefined);
-            setAuthFunction(undefined);
-            return;
-        } else if (authValue.refresh_token) {
-            setTimeoutFunc(getTimer());
-        }
-
-        if (authValue.refresh_token && authValue.access_token) {
-            console.log("doing");
-            setAuthFunction(authValue as Auth);
-        } else if (authValue.refresh_token) {
-            // AuthValue is just refresh token
-            setAuthFunction({
-                refresh_token: authValue.refresh_token,
-                access_token: (auth as Auth).access_token,
-            });
-        }
-    };
+    useEffect(() => {
+        const refresh_token = localStorage.getItem("refresh_token");
+        console.log("HEY AUTH");
+        console.log(refresh_token);
+        if (refresh_token) setAuthFn({ refresh_token });
+    }, []);
 
     return (
         <Router history={history}>
@@ -101,10 +95,10 @@ function AppNavigator() {
                             {auth ? <Redirect to={"/cars"} /> : <Redirect to={"/login"} />}
                         </Route>
                         <Route path={"/login"} exact>
-                            <Login setAuth={setAuth} />
+                            {!auth ? <Login setAuth={setAuth} /> : <Redirect to={"/cars"} />}
                         </Route>
                         <Route path={"/register"} exact>
-                            <Register setAuth={setAuth} />
+                            {!auth ? <Register setAuth={setAuth} /> : <Redirect to={"/cars"} />}
                         </Route>
                         <PrivateRoute auth={auth !== undefined} path={"/cars"} exact>
                             <Cars />

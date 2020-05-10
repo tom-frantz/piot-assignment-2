@@ -1,11 +1,11 @@
 import React, { SetStateAction } from "react";
 import { Layout, Form, Input, Button } from "antd";
 import axios from "axios";
-import { Auth } from "../App";
+import { Auth, getAuthTimer } from "../App";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 
 interface RegisterProps extends RouteComponentProps<{}> {
-    setAuth(authValue: undefined | Partial<Auth>): void;
+    setAuth(authValue: Auth): void;
 }
 
 const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
@@ -26,6 +26,7 @@ const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
                 props.setAuth({
                     access_token: result.data.access_token,
                     refresh_token: result.data.refresh_token,
+                    timeout: getAuthTimer(),
                 });
                 props.history.push("/cars");
             })
