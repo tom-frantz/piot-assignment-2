@@ -9,7 +9,13 @@ import re
 
 parser_new = reqparse.RequestParser()
 parser_new.add_argument('car_number', type = inputs.regex('^[A-Za-z0-9]{1,6}$'), required=True)
+parser_new.add_argument('make', required=True)
+parser_new.add_argument('body_type', required=True)
+parser_new.add_argument('colour', required=True)
 parser_new.add_argument('seats', type = inputs.int_range(1,12), required=True)
+parser_new.add_argument('cost_per_hour', required=True)
+parser_new.add_argument('latitude')
+parser_new.add_argument('longitude')
 parser_new.add_argument('lock_status', type=inputs.boolean)
 # req body must input string 'true' or 'false' (case sensitive) as boolean value
 parser_new.add_argument('available', type=inputs.boolean)
@@ -22,11 +28,24 @@ class NewCar(Resource):
         args = parser_new.parse_args()
         car_number = args['car_number']
         car_number = car_number.upper()
-        seats = args['seats']
 
-        # optional request arguments
+        make = args['make']
+        body_type = args['body_type']
+        colour = args['colour']
+        seats = args['seats']
+        cost_per_hour = args['cost_per_hour']
+
+        # optional request arguments by default
+        latitude = -37.804663448
+        longitude = 144.957996168
         lock_status = True
         available = True
+
+        if args['latitude'] is not None:
+            latitude = args['latitude']
+        
+        if args['longitude'] is not None:
+            longitude = args['longitude']
 
         if args['lock_status'] is not None:
             lock_status = args['lock_status']
@@ -36,7 +55,11 @@ class NewCar(Resource):
 
         new_car = cars.CarModel(
             car_number=car_number,
+            make = make,
+            body_type = body_type,
+            colour = colour,
             seats=seats,
+            cost_per_hour = cost_per_hour,
             lock_status=lock_status,
             available=available
         )
@@ -44,7 +67,11 @@ class NewCar(Resource):
         try:
             new_car.save_to_db()
             return ({'car_number': car_number,
+                     'make': make,
+                     'body_type': body_type,
+                     'colour': colour,
                      'seats': seats,
+                     'cost_per_hour': cost_per_hour,
                      'lock_status': lock_status,
                      'available': available
                      })
@@ -65,7 +92,11 @@ class CarDetail(Resource):
             result = cars.CarModel.query.filter_by(
                 car_number=car_number).first()
             return ({"car_number": result.car_number,
+                    "make": result.make,
+                    "body_type": result.body_type,
+                    "colour": result.colour,
                      "seats": result.seats,
+                     "cost_per_hour": result.cost_per_hour,
                      "lock_status": result.lock_status,
                      "available": result.available}, 200)
 
