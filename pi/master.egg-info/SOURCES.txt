@@ -1,5 +1,6 @@
 setup.py
 master/__init__.py
+master/config.py
 master.egg-info/PKG-INFO
 master.egg-info/SOURCES.txt
 master.egg-info/dependency_links.txt

@@ -14,6 +14,7 @@ passlib = "*"
 flask-jwt-extended = "*"
 pymysql = "*"
 flask-cors = "*"
+simplejson = "*"
 
 [requires]
 python_version = "3.8"

@@ -4,6 +4,7 @@ from master import app, api
 from sqlalchemy.exc import SQLAlchemyError
 from master.models import cars
 import re
+import simplejson as json
 
 # import sys
 
@@ -72,6 +73,8 @@ class NewCar(Resource):
                      'colour': colour,
                      'seats': seats,
                      'cost_per_hour': cost_per_hour,
+                     'latitude': latitude,
+                     'longitude': longitude,
                      'lock_status': lock_status,
                      'available': available
                      })
@@ -96,7 +99,9 @@ class CarDetail(Resource):
                     "body_type": result.body_type,
                     "colour": result.colour,
                      "seats": result.seats,
-                     "cost_per_hour": result.cost_per_hour,
+                     "latitude": json.dumps(result.latitude, use_decimal = True),
+                     "longitude": json.dumps(result.longitude, use_decimal = True),
+                     "cost_per_hour": json.dumps(result.cost_per_hour, use_decimal = True),
                      "lock_status": result.lock_status,
                      "available": result.available}, 200)
 
