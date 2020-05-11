@@ -4,6 +4,7 @@ import { Menu } from "antd";
 
 interface NavbarProps {
     auth: boolean;
+    setAuth(auth: undefined): void;
 }
 
 const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
@@ -17,7 +18,14 @@ const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
                 <Menu.Item key="/cars">
                     <Link to={"/cars"}>Cars</Link>
                 </Menu.Item>,
-                <Menu.Item key="something">Log out</Menu.Item>,
+                <Menu.Item
+                    key="something"
+                    onClick={() => {
+                        props.setAuth(undefined);
+                    }}
+                >
+                    Log out
+                </Menu.Item>,
             ]}
             {!auth && [
                 <Menu.Item key="/login">

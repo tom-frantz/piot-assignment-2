@@ -31,6 +31,10 @@ function AppNavigator() {
             localStorage.setItem("refresh_token", auth.refresh_token);
         }
 
+        if (auth === undefined) {
+            localStorage.removeItem("refresh_token");
+        }
+
         setAuthFn(auth);
     };
 
@@ -87,7 +91,7 @@ function AppNavigator() {
         <Router history={history}>
             <Layout style={{ height: "100vh" }}>
                 <Header>
-                    <Navbar auth={auth !== undefined} />
+                    <Navbar auth={auth !== undefined} setAuth={setAuth} />
                 </Header>
                 <Content style={{ display: "flex", flexGrow: 1, justifyContent: "center" }}>
                     <Switch>
