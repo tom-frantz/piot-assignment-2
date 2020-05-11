@@ -6,30 +6,36 @@ from flask_jwt_extended import (
 from master import app, api, db
 from sqlalchemy.exc import SQLAlchemyError
 from master.models import bookings, cars
+from datetime import date, datetime, timedelta
 
 parser_new = reqparse.RequestParser()
 parser_new.add_argument('car_number', type = inputs.regex('^[A-Za-z0-9]{1,6}$'), required=True)
 
 # "2013-01-01T06:00/2013-01-01T12:00" -> datetime(2013, 1, 1, 6), datetime(2013, 1, 1, 12)
+# "2013-01-01/2013-01-01" -> date(2013, 1, 1), date(2013, 1, 1)
 # A tuple of depature and return time in iso8601 format
 parser_new.add_argument('booking_period', type=inputs.iso8601interval)
 
 parser_cancel = reqparse.RequestParser()
 parser_cancel.add_argument('booking_id', type = inputs.positive, required=True)
 
-def check_and_book(car_number):
+def validate_booking_period(car_number, departure_time, return_time):
     try:
-        result = cars.CarModel.query.filter_by(car_number=car_number).first()
+        result = bookings.BookingModel.query.filter_by(car_number=car_number).all()
         if result is None:
-            abort(500, message="Car {} doesn't exisit.".format(car_number))
-        elif not result.available:
-            abort(403, message='The car has already been booked.')
+            pass
         else:
-            result.available=False
-            db.session.commit()
+            for i in result:
+                if departure_time.date() < datetime.utcnow().date():
+                    abort(403, message = 'You can\'t make a booking on past days.')
+                elif i.departure_time.date() <= departure_time.date() <= i.return_time.date() \
+                    or i.departure_time.date() <= return_time.date() <= i.return_time.date():
+                    abort(403, message = 'Car {} is not available on selected days.'.format(car_number))
+                else: 
+                    pass
     except SQLAlchemyError as e:
         error = str(e.__dict__['orig'])
-        return {'message': error}, 500
+        abort(500, message = error)
 
 class MyBookedCars(Resource):
     @jwt_required
@@ -61,7 +67,7 @@ class NewBooking(Resource):
         departure_time = booking_period[0]
         return_time = booking_period[1]
 
-        check_and_book(car_number)
+        validate_booking_period(car_number, departure_time, return_time)
 
         new_booking = bookings.BookingModel(
             car_number=car_number,
