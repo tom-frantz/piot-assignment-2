@@ -1,4 +1,4 @@
-from flask_restful import reqparse, Resource, abort
+from flask_restful import reqparse, abort, Resource, inputs
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -9,15 +9,17 @@ from flask_jwt_extended import (
 from master.auth import check_user_exists, verify_password
 from passlib.hash import pbkdf2_sha256 as sha256
 from sqlalchemy.exc import SQLAlchemyError
-from master import api, db
+from master import app, api, db
+from master.models import users
+
 
 parser_get_tokens = reqparse.RequestParser(bundle_errors=True)
-parser_get_tokens.add_argument('username', required=True)
-parser_get_tokens.add_argument('password', required=True)
+parser_get_tokens.add_argument('username', type=inputs.regex('^[A-Za-z0-9-_]{3,15}$'), required=True)
+parser_get_tokens.add_argument('password', type=inputs.regex('^[A-Za-z0-9-_]{8,30}$'), required=True)
 
 parser_change_password = reqparse.RequestParser(bundle_errors=True)
-parser_change_password.add_argument('old_password', required=True)
-parser_change_password.add_argument('new_password', required=True)
+parser_change_password.add_argument('old_password', type=inputs.regex('^[A-Za-z0-9-_]{8,30}$'), required=True)
+parser_change_password.add_argument('new_password', type=inputs.regex('^[A-Za-z0-9-_]{8,30}$'), required=True)
 
 
 def check_user(current_user, password):
@@ -72,7 +74,9 @@ class ChangePassword(Resource):
         old_password = args['old_password']
         new_password = args['new_password']
 
-        result = self.check_user(current_user, old_password)
+        result = check_user_exists(current_user)
+        stored_password = result.password
+        verify_password(old_password, stored_password)
 
         try:
             # user = users.UserModel.query.filter_by(username=current_user).first()

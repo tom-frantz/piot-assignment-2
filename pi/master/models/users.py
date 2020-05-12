@@ -11,6 +11,8 @@ class UserModel(db.Model):
     last_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False)
 
+    bookings = db.relationship('BookingModel', backref='Users', lazy=True)
+
     def add_new_record(self):
         db.session.add(self)
         db.session.commit()
