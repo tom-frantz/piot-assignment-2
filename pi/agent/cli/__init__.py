@@ -1,9 +1,7 @@
-
 import sys
 
 
-class Things():
-
+class Things:
     def login(self):
         username = input("Please iuput your username:")
         print(username)
@@ -26,23 +24,25 @@ class Things():
         print("will call the return car method")
 
 
-class Menu():
+class Menu:
     def __init__(self):
         self.thing = Things()
         self.choices = {
             "1": self.thing.login,
             "2": self.thing.unlock_car,
             "3": self.thing.return_car,
-            "4": self.quit
+            "4": self.quit,
         }
 
     def display_menu(self):
-        print("""
+        print(
+            """
                  Operation Menu:
                  1. Login
                  2. Unlock Car
                  3. Return Car
-                 4. Quit""")
+                 4. Quit"""
+        )
 
     def run(self):
         while True:
@@ -63,7 +63,3 @@ class Menu():
     def quit(self):
         print("\nThank you for using this script!\n")
         sys.exit(0)
-
-
-if __name__ == '__main__':
-    Menu().run()
