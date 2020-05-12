@@ -1,13 +1,13 @@
 from flask_restful import reqparse, abort, Resource, inputs
 from flask_jwt_extended import jwt_required
-from master import app, api
+from master import app, api, db
 from sqlalchemy.exc import SQLAlchemyError
-from master.models import cars
+from sqlalchemy import and_
+from master.models import cars, bookings
 import re
 import simplejson as json
 
-# import sys
-
+# request parser: adding a new car
 parser_new = reqparse.RequestParser()
 parser_new.add_argument(
     'car_number', type=inputs.regex('^[A-Za-z0-9]{1,6}$'), required=True
@@ -19,12 +19,17 @@ parser_new.add_argument('seats', type=inputs.int_range(1, 12), required=True)
 parser_new.add_argument('cost_per_hour', required=True)
 parser_new.add_argument('latitude')
 parser_new.add_argument('longitude')
+# !!ATTENTION!!
+# Req body must input string 'true' or 'false' (case sensitive) as boolean value
 parser_new.add_argument('lock_status', type=inputs.boolean)
-# req body must input string 'true' or 'false' (case sensitive) as boolean value
 parser_new.add_argument('available', type=inputs.boolean)
 
-# TODO: admin only
-
+# request parser: available cars
+parser_available = reqparse.RequestParser()
+# "2013-01-01T06:00/2013-01-01T12:00" -> datetime(2013, 1, 1, 6), datetime(2013, 1, 1, 12)
+# "2013-01-01/2013-01-01" -> date(2013, 1, 1), date(2013, 1, 1)
+# A tuple of depature and return time in iso8601 format
+parser_available.add_argument('time_range', type = inputs.iso8601interval)
 
 class NewCar(Resource):
     @jwt_required
@@ -64,6 +69,8 @@ class NewCar(Resource):
             colour=colour,
             seats=seats,
             cost_per_hour=cost_per_hour,
+            latitude=latitude,
+            longitude=longitude,
             lock_status=lock_status,
             available=available,
         )
@@ -96,7 +103,8 @@ class CarDetail(Resource):
             inputs.regex('^[A-Za-z0-9]{1,6}$')(car_number)
 
             car_number = car_number.upper()
-            result = cars.CarModel.query.filter_by(car_number=car_number).first()
+            result = cars.CarModel.query.filter_by(
+                car_number=car_number).first()
             return (
                 {
                     "car_number": result.car_number,
@@ -123,15 +131,31 @@ class CarDetail(Resource):
 class AvailableCars(Resource):
     @jwt_required
     def get(self):
-        try:
-            result = cars.CarModel.query.filter_by(available=True).all()
+        args = parser_available.parse_args()
+        
+        time_range = args['time_range']
+        start_time = time_range[0]
+        end_time = time_range[1]
 
+        try:
+            car_model = cars.CarModel
+            booking_model = bookings.BookingModel
+            booked_cars = db.session.query(car_model.car_number).join(booking_model).filter(and_(booking_model.departure_time<=end_time, booking_model.return_time>=start_time)).subquery()
+            filtered_result = db.session.query(car_model).filter(car_model.car_number.notin_(booked_cars)).all()
             available_cars = list(
-                map(
-                    lambda item: {"car_number": item.car_number, "seats": item.seats},
-                    result,
+                map(lambda item: {
+                    "car_number": item.car_number,
+                    "make": item.make,
+                    "body_type": item.body_type,
+                    "colour": item.colour,
+                    "seats": item.seats,
+                    "latitude": json.dumps(item.latitude, use_decimal=True),
+                    "longitude": json.dumps(item.longitude, use_decimal=True),
+                    "cost_per_hour": json.dumps(item.cost_per_hour, use_decimal=True),
+                    "lock_status": item.lock_status,
+                    "available": item.available
+                    }, filtered_result)
                 )
-            )
             return available_cars, 200
 
         except SQLAlchemyError as e:
