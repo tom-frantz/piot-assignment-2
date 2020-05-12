@@ -13,11 +13,21 @@ from master.models import users
 # import sys
 
 parser = reqparse.RequestParser(bundle_errors=True)
-parser.add_argument('username', type=inputs.regex('^[A-Za-z0-9-_]{3,15}$'), required=True)
+parser.add_argument(
+    'username', type=inputs.regex('^[A-Za-z0-9-_]{3,15}$'), required=True
+)
 parser.add_argument('password', type=inputs.regex('^[A-Za-z0-9]{8,30}$'), required=True)
-parser.add_argument('first_name', type=inputs.regex('^[A-Za-z0-9-_]{1,30}$'), required=True)
-parser.add_argument('last_name', type=inputs.regex('^[A-Za-z0-9-_]{1,30}$'), required=True)
-parser.add_argument('email', type=inputs.regex('^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$'), required=True)
+parser.add_argument(
+    'first_name', type=inputs.regex('^[A-Za-z0-9-_]{1,30}$'), required=True
+)
+parser.add_argument(
+    'last_name', type=inputs.regex('^[A-Za-z0-9-_]{1,30}$'), required=True
+)
+parser.add_argument(
+    'email',
+    type=inputs.regex('^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$'),
+    required=True,
+)
 
 
 def check_duplicate_user(user):
@@ -73,8 +83,7 @@ class Profile(Resource):
     def get(self):
         current_user = get_jwt_identity()
         try:
-            result = users.UserModel.query.filter_by(
-                username=current_user).first()
+            result = users.UserModel.query.filter_by(username=current_user).first()
             return {
                 'username': result.username,
                 'first_name': result.first_name,

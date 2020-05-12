@@ -10,9 +10,9 @@ import os
 app = Flask(__name__)
 
 # load config
-if os.environ['FLASK_ENV']=="testing":
+if os.environ['FLASK_ENV'] == "testing":
     app.config.from_object('master.config.TestingConfig')
-elif os.environ['FLASK_ENV']=="production":
+elif os.environ['FLASK_ENV'] == "production":
     app.config.from_object('master.config.ProductionConfig')
 else:
     app.config.from_object('master.config.DevelopmentConfig')
@@ -39,5 +39,5 @@ import master.sockets
 # create database (if not exist) before first api request
 @app.before_first_request
 def create_tables():
-    #db.drop_all()
-
+    db.drop_all()
+    db.create_all()

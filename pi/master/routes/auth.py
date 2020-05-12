@@ -14,12 +14,20 @@ from master.models import users
 
 
 parser_get_tokens = reqparse.RequestParser(bundle_errors=True)
-parser_get_tokens.add_argument('username', type=inputs.regex('^[A-Za-z0-9-_]{3,15}$'), required=True)
-parser_get_tokens.add_argument('password', type=inputs.regex('^[A-Za-z0-9-_]{8,30}$'), required=True)
+parser_get_tokens.add_argument(
+    'username', type=inputs.regex('^[A-Za-z0-9-_]{3,15}$'), required=True
+)
+parser_get_tokens.add_argument(
+    'password', type=inputs.regex('^[A-Za-z0-9-_]{8,30}$'), required=True
+)
 
 parser_change_password = reqparse.RequestParser(bundle_errors=True)
-parser_change_password.add_argument('old_password', type=inputs.regex('^[A-Za-z0-9-_]{8,30}$'), required=True)
-parser_change_password.add_argument('new_password', type=inputs.regex('^[A-Za-z0-9-_]{8,30}$'), required=True)
+parser_change_password.add_argument(
+    'old_password', type=inputs.regex('^[A-Za-z0-9-_]{8,30}$'), required=True
+)
+parser_change_password.add_argument(
+    'new_password', type=inputs.regex('^[A-Za-z0-9-_]{8,30}$'), required=True
+)
 
 
 def check_user(current_user, password):

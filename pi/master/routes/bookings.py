@@ -9,7 +9,9 @@ from master.models import bookings, cars
 from datetime import date, datetime, timedelta
 
 parser_new = reqparse.RequestParser()
-parser_new.add_argument('car_number', type = inputs.regex('^[A-Za-z0-9]{1,6}$'), required=True)
+parser_new.add_argument(
+    'car_number', type=inputs.regex('^[A-Za-z0-9]{1,6}$'), required=True
+)
 
 # "2013-01-01T06:00/2013-01-01T12:00" -> datetime(2013, 1, 1, 6), datetime(2013, 1, 1, 12)
 # "2013-01-01/2013-01-01" -> date(2013, 1, 1), date(2013, 1, 1)
@@ -17,7 +19,8 @@ parser_new.add_argument('car_number', type = inputs.regex('^[A-Za-z0-9]{1,6}$'),
 parser_new.add_argument('booking_period', type=inputs.iso8601interval)
 
 parser_cancel = reqparse.RequestParser()
-parser_cancel.add_argument('booking_id', type = inputs.positive, required=True)
+parser_cancel.add_argument('booking_id', type=inputs.positive, required=True)
+
 
 def validate_booking_period(car_number, departure_time, return_time):
     try:
@@ -27,15 +30,27 @@ def validate_booking_period(car_number, departure_time, return_time):
         else:
             for i in result:
                 if departure_time.date() < datetime.utcnow().date():
-                    abort(403, message = 'You can\'t make a booking on past days.')
-                elif i.departure_time.date() <= departure_time.date() <= i.return_time.date() \
-                    or i.departure_time.date() <= return_time.date() <= i.return_time.date():
-                    abort(403, message = 'Car {} is not available on selected days.'.format(car_number))
-                else: 
+                    abort(403, message='You can\'t make a booking on past days.')
+                elif (
+                    i.departure_time.date()
+                    <= departure_time.date()
+                    <= i.return_time.date()
+                    or i.departure_time.date()
+                    <= return_time.date()
+                    <= i.return_time.date()
+                ):
+                    abort(
+                        403,
+                        message='Car {} is not available on selected days.'.format(
+                            car_number
+                        ),
+                    )
+                else:
                     pass
     except SQLAlchemyError as e:
         error = str(e.__dict__['orig'])
-        abort(500, message = error)
+        abort(500, message=error)
+
 
 class MyBookedCars(Resource):
     @jwt_required
@@ -43,12 +58,17 @@ class MyBookedCars(Resource):
         current_user = get_jwt_identity()
 
         try:
-            result = bookings.BookingModel.query.filter_by(
-                username=current_user).all()
-            booked_cars = list(map(lambda item: {
-                'booking_id': item.booking_id,
-                'car_number': item.car_number,
-                'created_at': item.created_at.isoformat()}, result))
+            result = bookings.BookingModel.query.filter_by(username=current_user).all()
+            booked_cars = list(
+                map(
+                    lambda item: {
+                        'booking_id': item.booking_id,
+                        'car_number': item.car_number,
+                        'created_at': item.created_at.isoformat(),
+                    },
+                    result,
+                )
+            )
             return booked_cars, 200
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
@@ -72,15 +92,17 @@ class NewBooking(Resource):
         new_booking = bookings.BookingModel(
             car_number=car_number,
             username=current_user,
-            departure_time = departure_time,
-            return_time = return_time
+            departure_time=departure_time,
+            return_time=return_time,
         )
 
         try:
 
             new_booking.save_to_db()
             return {
-                'message': "Your booking (id: {}) for car {} has been successfully created.".format(new_booking.booking_id, car_number)
+                'message': "Your booking (id: {}) for car {} has been successfully created.".format(
+                    new_booking.booking_id, car_number
+                )
             }
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
@@ -95,16 +117,24 @@ class CancelBooking(Resource):
 
         try:
             result_booking = bookings.BookingModel.query.filter_by(
-                booking_id=current_booking).first()
+                booking_id=current_booking
+            ).first()
             result_booking.active = False
 
-            result_car = cars.CarModel.query.filter_by(car_number= result_booking.car_number).first()
+            result_car = cars.CarModel.query.filter_by(
+                car_number=result_booking.car_number
+            ).first()
             result_car.available = True
 
             db.session.commit()
-            return ({
-                'message': "Your booking {} has been canceled.".format(current_booking)
-            }, 200)
+            return (
+                {
+                    'message': "Your booking {} has been canceled.".format(
+                        current_booking
+                    )
+                },
+                200,
+            )
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
