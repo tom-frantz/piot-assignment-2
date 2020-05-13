@@ -4,25 +4,25 @@ from master import app, api, db
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import and_
 from master.models import cars, bookings
+import master.validation as validate
 import re
 import simplejson as json
 
 # request parser: adding a new car
-parser_new = reqparse.RequestParser()
+parser_new = reqparse.RequestParser(bundle_errors=True)
 parser_new.add_argument(
     'car_number', type=inputs.regex('^[A-Za-z0-9]{1,6}$'), required=True
 )
-parser_new.add_argument('make', required=True)
-parser_new.add_argument('body_type', required=True)
-parser_new.add_argument('colour', required=True)
+parser_new.add_argument('make', type=validate.string_30, required=True)
+parser_new.add_argument('body_type', type=validate.string_30, required=True)
+parser_new.add_argument('colour', type=validate.string_30, required=True)
 parser_new.add_argument('seats', type=inputs.int_range(1, 12), required=True)
-parser_new.add_argument('cost_per_hour', required=True)
-parser_new.add_argument('latitude')
-parser_new.add_argument('longitude')
+parser_new.add_argument('cost_per_hour', type=validate.price, required=True)
+parser_new.add_argument('latitude', type= validate.latitude_decimal)
+parser_new.add_argument('longitude', type = validate.longitude_decimal)
 # !!ATTENTION!!
 # Req body must input string 'true' or 'false' (case sensitive) as boolean value
 parser_new.add_argument('lock_status', type=inputs.boolean)
-parser_new.add_argument('available', type=inputs.boolean)
 
 # request parser: available cars
 parser_available = reqparse.RequestParser()
@@ -49,7 +49,6 @@ class NewCar(Resource):
         latitude = -37.804663448
         longitude = 144.957996168
         lock_status = True
-        available = True
 
         if args['latitude'] is not None:
             latitude = args['latitude']
@@ -59,9 +58,6 @@ class NewCar(Resource):
 
         if args['lock_status'] is not None:
             lock_status = args['lock_status']
-
-        if args['available'] is not None:
-            lock_status = args['available']
 
         new_car = cars.CarModel(
             car_number=car_number,
@@ -73,7 +69,6 @@ class NewCar(Resource):
             latitude=latitude,
             longitude=longitude,
             lock_status=lock_status,
-            available=available,
         )
 
         try:
@@ -88,7 +83,6 @@ class NewCar(Resource):
                 'latitude': latitude,
                 'longitude': longitude,
                 'lock_status': lock_status,
-                'available': available,
             }, 201)
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
@@ -115,13 +109,12 @@ class CarDetail(Resource):
                     "longitude": json.dumps(result.longitude, use_decimal=True),
                     "cost_per_hour": json.dumps(result.cost_per_hour, use_decimal=True),
                     "lock_status": result.lock_status,
-                    "available": result.available,
                 },
                 200,
             )
 
         except ValueError as ve:
-            return {'message': "car number format error"}, 403
+            return {'message': str(ve)}, 403
         except SQLAlchemyError as se:
             error = str(se.__dict__['orig'])
             return {'message': error}, 500
@@ -154,7 +147,6 @@ class AvailableCars(Resource):
                     "longitude": json.dumps(item.longitude, use_decimal=True),
                     "cost_per_hour": json.dumps(item.cost_per_hour, use_decimal=True),
                     "lock_status": item.lock_status,
-                    "available": item.available
                 }, filtered_result)
             )
             return available_cars, 200
@@ -183,7 +175,6 @@ class SearchCars(Resource):
                         "longitude": json.dumps(item.longitude, use_decimal=True),
                         "cost_per_hour": json.dumps(item.cost_per_hour, use_decimal=True),
                         "lock_status": item.lock_status,
-                        "avaialble": item.available
                     },
                     result,
                 )

@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from master.models import bookings, cars
 from datetime import date, datetime, timedelta
 
-parser_new = reqparse.RequestParser()
+parser_new = reqparse.RequestParser(bundle_errors=True)
 parser_new.add_argument(
     'car_number', type=inputs.regex('^[A-Za-z0-9]{1,6}$'), required=True
 )

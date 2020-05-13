@@ -18,9 +18,8 @@ class BookingModel(db.Model):
     )
     departure_time = db.Column(db.DateTime, nullable=False)
     return_time = db.Column(db.DateTime, nullable=False)
-    # booking status: active=true, canceled=false
-    active = db.Column(db.Boolean, default=True, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False,
+                           default=datetime.utcnow)
 
     def save_to_db(self):
         db.session.add(self)
