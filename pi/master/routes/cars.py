@@ -1,4 +1,4 @@
-from flask_restful import reqparse, abort, Resource, inputs
+from flask_restful import reqparse, abort, Resource, inputs, request
 from flask_jwt_extended import jwt_required
 from master import app, api, db
 from sqlalchemy.exc import SQLAlchemyError
@@ -29,7 +29,8 @@ parser_available = reqparse.RequestParser()
 # "2013-01-01T06:00/2013-01-01T12:00" -> datetime(2013, 1, 1, 6), datetime(2013, 1, 1, 12)
 # "2013-01-01/2013-01-01" -> date(2013, 1, 1), date(2013, 1, 1)
 # A tuple of depature and return time in iso8601 format
-parser_available.add_argument('time_range', type = inputs.iso8601interval)
+parser_available.add_argument('time_range', type=inputs.iso8601interval)
+
 
 class NewCar(Resource):
     @jwt_required
@@ -77,7 +78,7 @@ class NewCar(Resource):
 
         try:
             new_car.save_to_db()
-            return {
+            return ({
                 'car_number': car_number,
                 'make': make,
                 'body_type': body_type,
@@ -88,12 +89,10 @@ class NewCar(Resource):
                 'longitude': longitude,
                 'lock_status': lock_status,
                 'available': available,
-            }
+            }, 201)
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
-
-        return {"message": "API for adding a new car."}
 
 
 class CarDetail(Resource):
@@ -132,7 +131,7 @@ class AvailableCars(Resource):
     @jwt_required
     def get(self):
         args = parser_available.parse_args()
-        
+
         time_range = args['time_range']
         start_time = time_range[0]
         end_time = time_range[1]
@@ -140,8 +139,10 @@ class AvailableCars(Resource):
         try:
             car_model = cars.CarModel
             booking_model = bookings.BookingModel
-            booked_cars = db.session.query(car_model.car_number).join(booking_model).filter(and_(booking_model.departure_time<=end_time, booking_model.return_time>=start_time)).subquery()
-            filtered_result = db.session.query(car_model).filter(car_model.car_number.notin_(booked_cars)).all()
+            booked_cars = db.session.query(car_model.car_number).join(booking_model).filter(and_(
+                booking_model.departure_time <= end_time, booking_model.return_time >= start_time)).subquery()
+            filtered_result = db.session.query(car_model).filter(
+                car_model.car_number.notin_(booked_cars)).all()
             available_cars = list(
                 map(lambda item: {
                     "car_number": item.car_number,
@@ -154,8 +155,8 @@ class AvailableCars(Resource):
                     "cost_per_hour": json.dumps(item.cost_per_hour, use_decimal=True),
                     "lock_status": item.lock_status,
                     "available": item.available
-                    }, filtered_result)
-                )
+                }, filtered_result)
+            )
             return available_cars, 200
 
         except SQLAlchemyError as e:
@@ -163,27 +164,72 @@ class AvailableCars(Resource):
             return {'message': error}, 500
 
 
-class SearchCarBySeats(Resource):
+class SearchCars(Resource):
     @jwt_required
-    def get(self, seats):
+    def get(self):
+        # TODO: validation of request args
 
         try:
-            inputs.int_range(1, 12)(seats)
-            result = cars.CarModel.query.filter_by(seats=seats).all()
+            result = cars.CarModel.query.filter_by(**request.args).all()
             filtered_cars = list(
                 map(
                     lambda item: {
                         "car_number": item.car_number,
+                        'make': item.make,
+                        'body_type': item.body_type,
                         "seats": item.seats,
+                        "colour": item.colour,
+                        "latitude": json.dumps(item.latitude, use_decimal=True),
+                        "longitude": json.dumps(item.longitude, use_decimal=True),
+                        "cost_per_hour": json.dumps(item.cost_per_hour, use_decimal=True),
                         "lock_status": item.lock_status,
-                        "avaialble": item.available,
+                        "avaialble": item.available
                     },
                     result,
                 )
             )
             return filtered_cars, 200
+            # return {'get': args['make']}, 200
         except ValueError as ve:
             return {'message': "Car seats should be in range 1-12 inclusive."}, 403
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return {'message': error}, 500
+
+
+class AllCars(Resource):
+    def get(self):
+        try:
+            all_cars = cars.CarModel.query.all()
+
+            car_list = []
+            for item in all_cars:
+                car_item = {
+                    'car_number': item.car_number,
+                    'make': item.make,
+                    'body_type': item.body_type,
+                    "seats": item.seats,
+                    "colour": item.colour,
+                    "latitude": json.dumps(item.latitude, use_decimal=True),
+                    "longitude": json.dumps(item.longitude, use_decimal=True),
+                    "cost_per_hour": json.dumps(item.cost_per_hour, use_decimal=True),
+                    "lock_status": item.lock_status,
+                    "bookings": []
+                }
+                all_bookings = bookings.BookingModel.query.filter_by(
+                    car_number=item.car_number).all()
+                if len(all_bookings) > 0:
+                    booking_list = list(map(lambda i: {
+                        'booking_id': i.booking_id,
+                        'departure_time': i.departure_time.isoformat(),
+                        'return_time': i.return_time.isoformat(),
+                        'created_at': i.created_at.isoformat()
+                    }, all_bookings))
+                    car_item['bookings'] = booking_list
+                car_list.append(car_item)
+
+            return car_list, 200
+
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
@@ -192,4 +238,5 @@ class SearchCarBySeats(Resource):
 api.add_resource(NewCar, '/cars/new')
 api.add_resource(CarDetail, '/cars/detail/<string:car_number>')
 api.add_resource(AvailableCars, '/cars/available')
-api.add_resource(SearchCarBySeats, '/cars/seats/<int:seats>')
+api.add_resource(SearchCars, '/cars/search')
+api.add_resource(AllCars, '/cars/all')

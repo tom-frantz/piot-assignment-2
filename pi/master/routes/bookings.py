@@ -18,13 +18,11 @@ parser_new.add_argument(
 # A tuple of depature and return time in iso8601 format
 parser_new.add_argument('booking_period', type=inputs.iso8601interval)
 
-parser_cancel = reqparse.RequestParser()
-parser_cancel.add_argument('booking_id', type=inputs.positive, required=True)
-
 
 def validate_booking_period(car_number, departure_time, return_time):
     try:
-        result = bookings.BookingModel.query.filter_by(car_number=car_number).all()
+        result = bookings.BookingModel.query.filter_by(
+            car_number=car_number).all()
         if result is None:
             pass
         else:
@@ -38,6 +36,8 @@ def validate_booking_period(car_number, departure_time, return_time):
                     or i.departure_time.date()
                     <= return_time.date()
                     <= i.return_time.date()
+                    or (i.departure_time.date() <= departure_time.date()
+                        and i.return_time.date() >= return_time.date())
                 ):
                     abort(
                         403,
@@ -58,12 +58,15 @@ class MyBookedCars(Resource):
         current_user = get_jwt_identity()
 
         try:
-            result = bookings.BookingModel.query.filter_by(username=current_user).all()
+            result = bookings.BookingModel.query.filter_by(
+                username=current_user).all()
             booked_cars = list(
                 map(
                     lambda item: {
                         'booking_id': item.booking_id,
                         'car_number': item.car_number,
+                        'departure_time': item.departure_time.isoformat(),
+                        'return_time': item.return_time.isoformat(),
                         'created_at': item.created_at.isoformat(),
                     },
                     result,
@@ -111,26 +114,18 @@ class NewBooking(Resource):
 
 class CancelBooking(Resource):
     @jwt_required
-    def put(self):
-        args = parser_cancel.parse_args()
-        current_booking = args['booking_id']
+    def delete(self, booking_id):
 
         try:
             result_booking = bookings.BookingModel.query.filter_by(
-                booking_id=current_booking
-            ).first()
-            result_booking.active = False
-
-            result_car = cars.CarModel.query.filter_by(
-                car_number=result_booking.car_number
-            ).first()
-            result_car.available = True
+                booking_id=booking_id
+            ).delete()
 
             db.session.commit()
             return (
                 {
                     'message': "Your booking {} has been canceled.".format(
-                        current_booking
+                        booking_id
                     )
                 },
                 200,
@@ -142,4 +137,4 @@ class CancelBooking(Resource):
 
 api.add_resource(MyBookedCars, '/bookings/me')
 api.add_resource(NewBooking, '/bookings/new')
-api.add_resource(CancelBooking, '/bookings/cancel')
+api.add_resource(CancelBooking, '/bookings/cancel/<int:booking_id>')
