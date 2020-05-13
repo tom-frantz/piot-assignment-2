@@ -189,6 +189,7 @@ class SearchCars(Resource):
 
 
 class AllCars(Resource):
+    @jwt_required
     def get(self):
         try:
             all_cars = cars.CarModel.query.all()
@@ -212,6 +213,7 @@ class AllCars(Resource):
                 if len(all_bookings) > 0:
                     booking_list = list(map(lambda i: {
                         'booking_id': i.booking_id,
+                        'username': i.username,
                         'departure_time': i.departure_time.isoformat(),
                         'return_time': i.return_time.isoformat(),
                         'created_at': i.created_at.isoformat()
