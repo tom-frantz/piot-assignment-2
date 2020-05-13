@@ -42,10 +42,37 @@
   - required: yes
   - **Primary key**
   - Regex: `^[A-Za-z0-9]{1,6}$`
-- seats (optional)
+- make
+  - type: str
+  - length: 30
+  - required: yes
+- body_type
+  - type: str
+  - length: 30
+  - required: yes
+- seats
   - type: int
+  - Min: 1
   - Max: 12
+  - required: yes
   - `inputs.int_interval(1,12)`
+- colour
+  - type: str
+  - length: 30
+  - required: yes
+- cost_per_hour
+  - type: numeric.decimal
+  - range: non-negative
+  - required: yes
+- latitude
+  - type: numeric.decimal(11, 9)
+  - range: [-90 to 90]
+- longitude
+  - type: numeric.decimal(12, 9)
+  - range: [-180 to 180]
+- lock_status
+  - type: boolean
+  - *Req body input values: `true`, `false`*
 
 ## Bookings
 
@@ -64,8 +91,12 @@
   - required: yes
   - **Foreign key: Cars**
 - departure_time:
-  - type: DateTime
+  - type: DateTime, UTC
   - required: yes
 - return_time:
-  - type: DateTime
+  - type: DateTime, UTC
   - required: yes
+- created_at
+  - type: DateTime, UTC
+
+*Note: Booking period counts for date only, not time.*
