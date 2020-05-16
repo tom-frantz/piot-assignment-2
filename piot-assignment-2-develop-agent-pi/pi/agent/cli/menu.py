@@ -3,37 +3,30 @@ import sys
 import traceback
 # import logging
 # logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
-<<<<<<< HEAD
 # logging.info
 # DEBUG INFO WARNING ERROR CRITICAL
 
 
 class Things:
     def login(self, send_queue, recv_queue):
-=======
 #logging.info
 #DEBUG INFO WARNING ERROR CRITICAL
 
 class Things:
     def login(self,send_queue,recv_queue):
->>>>>>> 323dc3290a55f16052f8fc4b7dc3229904098283
         username = input("Please iuput your username:")
         print(username)
         password = input("Please input your password:")
         print(password)
         data = {
-<<<<<<< HEAD
             "cmd": "login",
             "username": username,
             "password": password,
         }
-=======
             "cmd":"login",
             "username":username,
             "password":password,
         }
-        print("will call the login method")
->>>>>>> 323dc3290a55f16052f8fc4b7dc3229904098283
         try:
             send_queue.put(data)
         except:
@@ -42,28 +35,22 @@ class Things:
             recv = recv_queue.get()
             if recv:
                 break
-<<<<<<< HEAD
         print("the login result is:", recv)
 
     def unlock_car(self, send_queue, recv_queue):
-=======
         print("the login result is:",recv)
 
     def unlock_car(self,send_queue,recv_queue):
->>>>>>> 323dc3290a55f16052f8fc4b7dc3229904098283
         booking_number = input("Please iuput your booking number:")
         # logging.info(booking_number)
         car_number = input("Please iuput your car number:")
         data = {
-<<<<<<< HEAD
             "cmd": "unlock_car",
             "booking_number": booking_number,
             "car_number": car_number,
-=======
             "cmd":"unlock_car",
             "booking_number":booking_number,
             "car_number":car_number,
->>>>>>> 323dc3290a55f16052f8fc4b7dc3229904098283
         }
         try:
             send_queue.put(data)
@@ -74,11 +61,7 @@ class Things:
             if recv:
                 break
 
-<<<<<<< HEAD
-    def return_car(self, send_queue, recv_queue):
-=======
     def return_car(self,send_queue,recv_queue):
->>>>>>> 323dc3290a55f16052f8fc4b7dc3229904098283
         booking_number = input("Please iuput your booking number:")
         print(booking_number)
         return_car_number = input("Please iuput your return car number:")
@@ -96,10 +79,6 @@ class Menu:
             "4": self.quit,
         }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 323dc3290a55f16052f8fc4b7dc3229904098283
     def display_menu(self):
         print(
             """
@@ -110,12 +89,8 @@ class Menu:
                  4. Quit"""
         )
 
-<<<<<<< HEAD
-    def run(self, send_queue, recv_queue):
-=======
-    def run(self,send_queue,recv_queue):
->>>>>>> 323dc3290a55f16052f8fc4b7dc3229904098283
 
+    def run(self,send_queue,recv_queue):
         while True:
             self.display_menu()
             try:
@@ -127,11 +102,7 @@ class Menu:
             choice = str(choice).strip()
             action = self.choices.get(choice)
             if action:
-<<<<<<< HEAD
                 action(send_queue, recv_queue)
-=======
-                action(send_queue,recv_queue)
->>>>>>> 323dc3290a55f16052f8fc4b7dc3229904098283
             else:
                 print("{0} is not a valid choice".format(choice))
 
