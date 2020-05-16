@@ -51,7 +51,6 @@ class Things:
         print(booking_number)
         return_car_number = input("Please iuput your return car number:")
         print(return_car_number)
-        print("will call the return car method")
 
 
 class Menu:
