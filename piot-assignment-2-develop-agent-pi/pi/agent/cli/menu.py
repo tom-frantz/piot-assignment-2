@@ -9,11 +9,6 @@ import traceback
 
 class Things:
     def login(self, send_queue, recv_queue):
-#logging.info
-#DEBUG INFO WARNING ERROR CRITICAL
-
-class Things:
-    def login(self,send_queue,recv_queue):
         username = input("Please iuput your username:")
         print(username)
         password = input("Please input your password:")
@@ -23,10 +18,7 @@ class Things:
             "username": username,
             "password": password,
         }
-            "cmd":"login",
-            "username":username,
-            "password":password,
-        }
+        print("will call the login method")
         try:
             send_queue.put(data)
         except:
@@ -38,9 +30,6 @@ class Things:
         print("the login result is:", recv)
 
     def unlock_car(self, send_queue, recv_queue):
-        print("the login result is:",recv)
-
-    def unlock_car(self,send_queue,recv_queue):
         booking_number = input("Please iuput your booking number:")
         # logging.info(booking_number)
         car_number = input("Please iuput your car number:")
@@ -48,9 +37,6 @@ class Things:
             "cmd": "unlock_car",
             "booking_number": booking_number,
             "car_number": car_number,
-            "cmd":"unlock_car",
-            "booking_number":booking_number,
-            "car_number":car_number,
         }
         try:
             send_queue.put(data)
@@ -61,11 +47,12 @@ class Things:
             if recv:
                 break
 
-    def return_car(self,send_queue,recv_queue):
+    def return_car(self, send_queue, recv_queue):
         booking_number = input("Please iuput your booking number:")
         print(booking_number)
         return_car_number = input("Please iuput your return car number:")
         print(return_car_number)
+        print("will call the return car method")
 
 
 class Menu:
@@ -89,8 +76,8 @@ class Menu:
                  4. Quit"""
         )
 
+    def run(self, send_queue, recv_queue):
 
-    def run(self,send_queue,recv_queue):
         while True:
             self.display_menu()
             try:
