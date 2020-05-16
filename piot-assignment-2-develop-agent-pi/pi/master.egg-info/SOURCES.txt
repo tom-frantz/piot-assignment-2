@@ -1,0 +1,9 @@
+setup.py
+master/__init__.py
+master/auth.py
+master/config.py
+master.egg-info/PKG-INFO
+master.egg-info/SOURCES.txt
+master.egg-info/dependency_links.txt
+master.egg-info/requires.txt
+master.egg-info/top_level.txt
