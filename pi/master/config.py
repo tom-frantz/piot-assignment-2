@@ -36,10 +36,7 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-
-    DB_PASSWORD = os.environ["My_SQL"]
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:{}@127.0.0.1:3306/CarShare'.format(
-        DB_PASSWORD
-    )
+    JWT_SECRET_KEY = 'jwt_testing'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///test/test.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True

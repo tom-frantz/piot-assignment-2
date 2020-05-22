@@ -17,6 +17,7 @@ flask-socketio = "*"
 requests = "*"
 flask-cors = "*"
 simplejson = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.8"

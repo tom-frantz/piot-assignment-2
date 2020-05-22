@@ -10,7 +10,7 @@ class UserModel(db.Model):
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False)
-
+    role = db.Column(db.String(20), nullable=False, default="user")
     bookings = db.relationship('BookingModel', backref='Users', lazy=True)
 
     def add_new_record(self):

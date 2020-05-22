@@ -56,10 +56,10 @@ class MyBookedCars(Resource):
     @jwt_required
     def get(self):
         current_user = get_jwt_identity()
-
+        username = current_user['username']
         try:
             result = bookings.BookingModel.query.filter_by(
-                username=current_user).all()
+                username=username).all()
             booked_cars = list(
                 map(
                     lambda item: {
@@ -82,6 +82,7 @@ class NewBooking(Resource):
     @jwt_required
     def post(self):
         current_user = get_jwt_identity()
+        username = current_user['username']
 
         args = parser_new.parse_args()
         car_number = args['car_number']
@@ -94,7 +95,7 @@ class NewBooking(Resource):
 
         new_booking = bookings.BookingModel(
             car_number=car_number,
-            username=current_user,
+            username=username,
             departure_time=departure_time,
             return_time=return_time,
         )
