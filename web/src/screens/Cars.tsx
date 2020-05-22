@@ -6,53 +6,79 @@ import { SearchOutlined } from "@ant-design/icons";
 interface CarsProps {}
 
 export type Car = {
-    number_plate: string;
+    car_number: string;
     make: string;
     body_type: string;
-    colour: string;
     seats: number;
-    location: [number, number];
-    cost: number;
+    colour: string;
+    latitude: number;
+    longitude: number;
+    cost_per_hour: number;
+    lock_status: boolean;
+    bookings: {
+        booking_id: number;
+        username: string;
+        departure_time: string;
+        return_time: string;
+        created_at: string;
+    }[];
 };
 
-const Cars: React.FC<CarsProps> = (props: CarsProps) => {
-    const [searchText, setSearchText] = useState<string>("");
-    const [searchedColumn, setSearchedColumn] = useState<string>("");
+interface UnformattedCar {
+    car_number: string;
+    make: string;
+    body_type: string;
+    seats: number;
+    colour: string;
+    latitude: string;
+    longitude: string;
+    cost_per_hour: string;
+    lock_status: boolean;
+    bookings: {
+        booking_id: number;
+        username: string;
+        departure_time: string;
+        return_time: string;
+        created_at: string;
+    }[];
+}
 
-    const [cars, setCars] = useState<Car[]>([
-        {
-            number_plate: "sqb981",
-            make: "RX-8",
-            body_type: "sports",
-            colour: "red",
-            seats: 4,
-            location: [0, 0],
-            cost: 100,
-        },
-        {
-            number_plate: "sqb981",
-            make: "RX-9",
-            body_type: "sports",
-            colour: "red",
-            seats: 4,
-            location: [0, 0],
-            cost: 100,
-        },
-        {
-            number_plate: "sqb981",
-            make: "RX-8",
-            body_type: "sports",
-            colour: "green",
-            seats: 4,
-            location: [0, 0],
-            cost: 100,
-        },
-    ]);
+const Cars: React.FC<CarsProps> = (props: CarsProps) => {
+    const [cars, setCars] = useState<Car[]>([]);
 
     useEffect(() => {
         console.log("axios");
-        axios.get("http://127.0.0.1:5000/cars/available").then((value: { data: Car[] }) => {
+        axios.get("http://127.0.0.1:5000/cars/all").then((value: { data: UnformattedCar[] }) => {
             console.log(value.data);
+            setCars(
+                value.data.map(
+                    ({
+                        car_number,
+                        make,
+                        body_type,
+                        bookings,
+                        colour,
+                        cost_per_hour,
+                        latitude,
+                        lock_status,
+                        longitude,
+                        seats,
+                    }: UnformattedCar): Car => {
+                        return {
+                            car_number,
+                            make,
+                            body_type,
+                            seats,
+                            colour,
+                            latitude: parseFloat(latitude),
+                            longitude: parseFloat(longitude),
+                            cost_per_hour: parseFloat(cost_per_hour),
+                            lock_status,
+                            bookings: [],
+                        };
+                    }
+                )
+            );
         });
     }, []);
 
@@ -105,13 +131,10 @@ const Cars: React.FC<CarsProps> = (props: CarsProps) => {
 
     const handleSearch = (selectedKeys: string, confirm: () => {}, dataIndex: string) => {
         confirm();
-        setSearchedColumn(dataIndex);
-        setSearchText(selectedKeys[0]);
     };
 
     const handleReset = (clearFilters: () => void) => {
         clearFilters();
-        setSearchText("");
     };
 
     return (
@@ -120,9 +143,9 @@ const Cars: React.FC<CarsProps> = (props: CarsProps) => {
             columns={[
                 {
                     title: "Number Plate",
-                    dataIndex: "number_plate",
+                    dataIndex: "car_number",
                     key: "numberPlate",
-                    ...getColumnSearchProps("number_plate"),
+                    ...getColumnSearchProps("car_number"),
                 },
                 { title: "Make", dataIndex: "make", key: "make", ...getColumnSearchProps("make") },
                 {
@@ -143,7 +166,12 @@ const Cars: React.FC<CarsProps> = (props: CarsProps) => {
                     key: "seats",
                     ...getColumnSearchProps("seats"),
                 },
-                { title: "Cost", dataIndex: "cost", key: "cost", ...getColumnSearchProps("cost") },
+                {
+                    title: "Cost",
+                    dataIndex: "cost_per_hour",
+                    key: "cost",
+                    ...getColumnSearchProps("cost_per_hour"),
+                },
                 {
                     title: "Actions",
                     key: "actions",
