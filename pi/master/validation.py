@@ -1,5 +1,6 @@
 import decimal
 
+
 def latitude_decimal(value):
     try:
         decimal.Decimal(value)
@@ -10,6 +11,7 @@ def latitude_decimal(value):
         raise ValueError("Latitude value out of range [-90,90].")
 
     return value
+
 
 def longitude_decimal(value):
     try:
@@ -22,11 +24,13 @@ def longitude_decimal(value):
 
     return value
 
+
 def string_30(value):
     value = str(value)
-    if len(value)>30:
+    if len(value) > 30:
         raise ValueError("String length should be less than or equal to 30.")
     return value
+
 
 def price(value, name):
     try:

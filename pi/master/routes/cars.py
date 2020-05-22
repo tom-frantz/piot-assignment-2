@@ -18,8 +18,8 @@ parser_new.add_argument('body_type', type=validate.string_30, required=True)
 parser_new.add_argument('colour', type=validate.string_30, required=True)
 parser_new.add_argument('seats', type=inputs.int_range(1, 12), required=True)
 parser_new.add_argument('cost_per_hour', type=validate.price, required=True)
-parser_new.add_argument('latitude', type= validate.latitude_decimal)
-parser_new.add_argument('longitude', type = validate.longitude_decimal)
+parser_new.add_argument('latitude', type=validate.latitude_decimal)
+parser_new.add_argument('longitude', type=validate.longitude_decimal)
 # !!ATTENTION!!
 # Req body must input string 'true' or 'false' (case sensitive) as boolean value
 parser_new.add_argument('lock_status', type=inputs.boolean)
@@ -73,17 +73,20 @@ class NewCar(Resource):
 
         try:
             new_car.save_to_db()
-            return ({
-                'car_number': car_number,
-                'make': make,
-                'body_type': body_type,
-                'colour': colour,
-                'seats': seats,
-                'cost_per_hour': cost_per_hour,
-                'latitude': latitude,
-                'longitude': longitude,
-                'lock_status': lock_status,
-            }, 201)
+            return (
+                {
+                    'car_number': car_number,
+                    'make': make,
+                    'body_type': body_type,
+                    'colour': colour,
+                    'seats': seats,
+                    'cost_per_hour': cost_per_hour,
+                    'latitude': latitude,
+                    'longitude': longitude,
+                    'lock_status': lock_status,
+                },
+                201,
+            )
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
@@ -96,8 +99,7 @@ class CarDetail(Resource):
             inputs.regex('^[A-Za-z0-9]{1,6}$')(car_number)
 
             car_number = car_number.upper()
-            result = cars.CarModel.query.filter_by(
-                car_number=car_number).first()
+            result = cars.CarModel.query.filter_by(car_number=car_number).first()
             return (
                 {
                     "car_number": result.car_number,
@@ -132,22 +134,39 @@ class AvailableCars(Resource):
         try:
             car_model = cars.CarModel
             booking_model = bookings.BookingModel
-            booked_cars = db.session.query(car_model.car_number).join(booking_model).filter(and_(
-                booking_model.departure_time <= end_time, booking_model.return_time >= start_time)).subquery()
-            filtered_result = db.session.query(car_model).filter(
-                car_model.car_number.notin_(booked_cars)).all()
+            booked_cars = (
+                db.session.query(car_model.car_number)
+                .join(booking_model)
+                .filter(
+                    and_(
+                        booking_model.departure_time <= end_time,
+                        booking_model.return_time >= start_time,
+                    )
+                )
+                .subquery()
+            )
+            filtered_result = (
+                db.session.query(car_model)
+                .filter(car_model.car_number.notin_(booked_cars))
+                .all()
+            )
             available_cars = list(
-                map(lambda item: {
-                    "car_number": item.car_number,
-                    "make": item.make,
-                    "body_type": item.body_type,
-                    "colour": item.colour,
-                    "seats": item.seats,
-                    "latitude": json.dumps(item.latitude, use_decimal=True),
-                    "longitude": json.dumps(item.longitude, use_decimal=True),
-                    "cost_per_hour": json.dumps(item.cost_per_hour, use_decimal=True),
-                    "lock_status": item.lock_status,
-                }, filtered_result)
+                map(
+                    lambda item: {
+                        "car_number": item.car_number,
+                        "make": item.make,
+                        "body_type": item.body_type,
+                        "colour": item.colour,
+                        "seats": item.seats,
+                        "latitude": json.dumps(item.latitude, use_decimal=True),
+                        "longitude": json.dumps(item.longitude, use_decimal=True),
+                        "cost_per_hour": json.dumps(
+                            item.cost_per_hour, use_decimal=True
+                        ),
+                        "lock_status": item.lock_status,
+                    },
+                    filtered_result,
+                )
             )
             return available_cars, 200
 
@@ -173,7 +192,9 @@ class SearchCars(Resource):
                         "colour": item.colour,
                         "latitude": json.dumps(item.latitude, use_decimal=True),
                         "longitude": json.dumps(item.longitude, use_decimal=True),
-                        "cost_per_hour": json.dumps(item.cost_per_hour, use_decimal=True),
+                        "cost_per_hour": json.dumps(
+                            item.cost_per_hour, use_decimal=True
+                        ),
                         "lock_status": item.lock_status,
                     },
                     result,
@@ -206,18 +227,24 @@ class AllCars(Resource):
                     "longitude": json.dumps(item.longitude, use_decimal=True),
                     "cost_per_hour": json.dumps(item.cost_per_hour, use_decimal=True),
                     "lock_status": item.lock_status,
-                    "bookings": []
+                    "bookings": [],
                 }
                 all_bookings = bookings.BookingModel.query.filter_by(
-                    car_number=item.car_number).all()
+                    car_number=item.car_number
+                ).all()
                 if len(all_bookings) > 0:
-                    booking_list = list(map(lambda i: {
-                        'booking_id': i.booking_id,
-                        'username': i.username,
-                        'departure_time': i.departure_time.isoformat(),
-                        'return_time': i.return_time.isoformat(),
-                        'created_at': i.created_at.isoformat()
-                    }, all_bookings))
+                    booking_list = list(
+                        map(
+                            lambda i: {
+                                'booking_id': i.booking_id,
+                                'username': i.username,
+                                'departure_time': i.departure_time.isoformat(),
+                                'return_time': i.return_time.isoformat(),
+                                'created_at': i.created_at.isoformat(),
+                            },
+                            all_bookings,
+                        )
+                    )
                     car_item['bookings'] = booking_list
                 car_list.append(car_item)
 
