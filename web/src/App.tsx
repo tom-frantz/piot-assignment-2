@@ -10,6 +10,7 @@ import Cars from "./screens/Cars";
 import Navbar from "./containers/Navbar";
 import PrivateRoute from "./containers/PrivateRoute";
 import Register from "./screens/Register";
+import Bookings from "./screens/Bookings";
 
 const { Content, Header, Footer } = Layout;
 
@@ -106,6 +107,9 @@ function AppNavigator() {
                         </Route>
                         <PrivateRoute auth={auth !== undefined} path={"/cars"} exact>
                             <Cars />
+                        </PrivateRoute>
+                        <PrivateRoute auth={auth !== undefined} path={"/bookings"} exact>
+                            <Bookings />
                         </PrivateRoute>
                     </Switch>
                 </Content>
