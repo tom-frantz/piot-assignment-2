@@ -4,12 +4,13 @@
    contain the root `toctree` directive.
 
 Welcome to the documentation for PIOT Assignment 2!
-=============================================
+===================================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   agent_pi
 
 
 Indices and tables
