@@ -1,7 +1,10 @@
 import sys
 from master import socketio
 import traceback
+<<<<<<< HEAD
 from datetime import datetime
+=======
+>>>>>>> 488b412b9c8e2fd2ed0de57500f9be0d27385238
 
 # import logging
 # logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
@@ -15,18 +18,25 @@ class Things:
         print(username)
         password = input("Please input your password:")
         print(password)
+<<<<<<< HEAD
         car_number = input("Please input your car number:")
         print(car_number)
         date = str(datetime.now())
+=======
+>>>>>>> 488b412b9c8e2fd2ed0de57500f9be0d27385238
         data = {
             "cmd": "login",
             "username": username,
             "password": password,
+<<<<<<< HEAD
             "car_number": car_number,
             "time": date
 
         }
         print(data)
+=======
+        }
+>>>>>>> 488b412b9c8e2fd2ed0de57500f9be0d27385238
         try:
             send_queue.put(data)
         except:
@@ -60,6 +70,7 @@ class Things:
         print(booking_number)
         return_car_number = input("Please iuput your return car number:")
         print(return_car_number)
+<<<<<<< HEAD
         data = {
             "cmd": "return_car",
             "booking_number": booking_number,
@@ -73,6 +84,8 @@ class Things:
             recv = recv_queue.get()
             if recv:
                 break
+=======
+>>>>>>> 488b412b9c8e2fd2ed0de57500f9be0d27385238
 
 
 class Menu:

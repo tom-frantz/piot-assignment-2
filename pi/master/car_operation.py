@@ -23,12 +23,24 @@ def refresh(data):
         return error_response("The token was invalid")
 
 
+<<<<<<< HEAD
 def user_unlock_car(data):
     return data
 
 
 def user_return_car(data):
     return data
+=======
+def user_unlock_car():
+
+    # sql =
+    return "ok", "res"
+
+
+def user_return_car():
+    # sql =
+    return "ok", "res"
+>>>>>>> 488b412b9c8e2fd2ed0de57500f9be0d27385238
 
 
 def check_user_exists(user):

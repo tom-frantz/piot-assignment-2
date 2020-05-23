@@ -47,7 +47,10 @@ Global_return_queue = None
 def op_unlock_car(sio, data):
     try:
         data["access_token"] = GlobalConf.access_token
+<<<<<<< HEAD
         data["refrsh_token"] = GlobalConf.refresh_token
+=======
+>>>>>>> 488b412b9c8e2fd2ed0de57500f9be0d27385238
         uri = "unlock_car"
         # uri = "/cars/unlock"
         # url = "http://127.0.0.1:5000/cars/unlock"
@@ -57,7 +60,10 @@ def op_unlock_car(sio, data):
         res = sio.emit(
             uri, data, callback=op_unlock_car_callback,
         )
+<<<<<<< HEAD
         print(data)
+=======
+>>>>>>> 488b412b9c8e2fd2ed0de57500f9be0d27385238
     except Exception as err:
         traceback.print_exc()
         jdata = {
@@ -79,12 +85,19 @@ def op_unlock_car_callback(number, data):
 def op_return_car(sio, data):
     try:
         data["access_token"] = GlobalConf.access_token
+<<<<<<< HEAD
         data["refrsh_token"] = GlobalConf.refresh_token
+=======
+        data["refrsh_token"] = GlobalConf.refrsh_token
+>>>>>>> 488b412b9c8e2fd2ed0de57500f9be0d27385238
         uri = "return_car"
         res = sio.emit(
             uri, data, callback=op_return_car_callback,
         )
+<<<<<<< HEAD
         print(data)
+=======
+>>>>>>> 488b412b9c8e2fd2ed0de57500f9be0d27385238
     except Exception as err:
         traceback.print_exc()
         jdata = {
@@ -95,6 +108,14 @@ def op_return_car(sio, data):
 
 def op_return_car_callback(data):
     print("op_return_car_callback output:", data)
+<<<<<<< HEAD
+=======
+    res = data["return_permission"]
+    if res is True:
+        print("this car has been unlock")
+    else:
+        print("this car cannot be unlock.")
+>>>>>>> 488b412b9c8e2fd2ed0de57500f9be0d27385238
     GlobalConf.recv_queue.put(data)
 
 
