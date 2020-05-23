@@ -3,20 +3,20 @@ from master import socketio
 from master.models import bookings, cars
 from master.car_operation import user_unlock_car, user_return_car
 from master.sockets.utils import success_response, error_response
-
-debug = True
+from master import db
 
 
 @socketio.on("unlock_car")
 def unlock_car(data):
     car_number = data["car_number"]
     try:
-        result = cars.CarModel.query.filter_by(
-            car_number=car_number, lock_status=True).first()
-        if result is False:
-            return 401, 'this car status is not locking.'
+        result = cars.CarModel.query.filter_by(car_number=car_number).first()
+        result.lock_status = True
+        db.session.commit()
+        if result is None:
+            return 401, 'result has no return value'
         else:
-            return 100, 'this car unlock successfully'
+            return 100, 'result has value'
     except Exception as e:
         error = str(e.__dict__['orig'])
         return 500, error
@@ -24,9 +24,11 @@ def unlock_car(data):
 
 @socketio.on("return_car")
 def return_car(data):
-    #car_number = data["car_number"]
+    car_number = data["return_car_number"]
     try:
-        result = True
+        result = cars.CarModel.query.filter_by(car_number=car_number).first()
+        result.lock_status = False
+        db.session.commit()
         if result is False:
             return 'this car status is not renting.'
         else:

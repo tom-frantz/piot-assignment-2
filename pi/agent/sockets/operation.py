@@ -68,11 +68,6 @@ def op_unlock_car(sio, data):
 
 def op_unlock_car_callback(number, data):
     print("op_unlock_car_callback output:", data)
-    res = data["unlock_permission"]
-    if res is True:
-        print("this car has been unlock")
-    else:
-        print("this car cannot be unlock.")
     GlobalConf.recv_queue.put(data)
 
 
@@ -84,7 +79,7 @@ def op_return_car(sio, data):
         res = sio.emit(
             uri, data, callback=op_return_car_callback,
         )
-        print(data)
+
     except Exception as err:
         traceback.print_exc()
         jdata = {

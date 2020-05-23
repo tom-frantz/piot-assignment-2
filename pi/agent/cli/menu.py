@@ -44,7 +44,7 @@ class Things:
         data = {
             "cmd": "unlock_car",
             "booking_number": booking_number,
-            "car_number": car_number,
+            "car_number": car_number
         }
         try:
             send_queue.put(data)
@@ -54,6 +54,7 @@ class Things:
             recv = recv_queue.get()
             if recv:
                 break
+        print("the unlock result is:", recv)
 
     def return_car(self, send_queue, recv_queue):
         booking_number = input("Please iuput your booking number:")
@@ -63,7 +64,7 @@ class Things:
         data = {
             "cmd": "return_car",
             "booking_number": booking_number,
-            "return_car_number": return_car_number,
+            "return_car_number": return_car_number
         }
         try:
             send_queue.put(data)
