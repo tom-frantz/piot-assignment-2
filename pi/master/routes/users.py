@@ -96,7 +96,7 @@ class Profile(Resource):
                 'first_name': result.first_name,
                 'last_name': result.last_name,
                 'email': result.email,
-                'role': result.role
+                #'role': result.role
             }
         except SQLAlchemyError as se:
             error = str(se.__dict__['orig'])
