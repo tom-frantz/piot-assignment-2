@@ -9,6 +9,8 @@ from passlib.hash import pbkdf2_sha256 as sha256
 def login(data):
     username = data["username"]
     password = data["password"]
+    car_number = data["car_number"]
+    time = data["time"]
     ok, res = check_user_exists(username)  # TODO
     if ok != 200:
         return error_response(res)
@@ -22,7 +24,11 @@ def login(data):
     access_token = create_access_token(identity=username)
     refresh_token = create_refresh_token(identity=username)
     return success_response(
-        username=username, access_token=access_token, refresh_token=refresh_token,
+        username=username,
+        access_token=access_token,
+        refresh_token=refresh_token,
+        car_number=car_number,
+        time=time,
     )
 
 

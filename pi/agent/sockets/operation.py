@@ -47,6 +47,7 @@ Global_return_queue = None
 def op_unlock_car(sio, data):
     try:
         data["access_token"] = GlobalConf.access_token
+        data["refresh_token"] = GlobalConf.refresh_token
         uri = "unlock_car"
         # uri = "/cars/unlock"
         # url = "http://127.0.0.1:5000/cars/unlock"
@@ -77,7 +78,7 @@ def op_unlock_car_callback(number, data):
 def op_return_car(sio, data):
     try:
         data["access_token"] = GlobalConf.access_token
-        data["refrsh_token"] = GlobalConf.refrsh_token
+        data["refresh_token"] = GlobalConf.refresh_token
         uri = "return_car"
         res = sio.emit(
             uri, data, callback=op_return_car_callback,
@@ -92,7 +93,6 @@ def op_return_car(sio, data):
 
 def op_return_car_callback(data):
     print("op_return_car_callback output:", data)
-    res = data["return_permission"]
     if res is True:
         print("this car has been unlock")
     else:

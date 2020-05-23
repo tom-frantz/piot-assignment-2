@@ -1,6 +1,7 @@
 import sys
 from master import socketio
 import traceback
+from datetime import datetime
 
 # import logging
 # logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
@@ -14,10 +15,15 @@ class Things:
         print(username)
         password = input("Please input your password:")
         print(password)
+        car_number = input("Please input your car number:")
+        print(car_number)
+        date = str(datetime.now())
         data = {
             "cmd": "login",
             "username": username,
             "password": password,
+            "car_number": car_number,
+            "time": date,
         }
         try:
             send_queue.put(data)
@@ -46,12 +52,27 @@ class Things:
             recv = recv_queue.get()
             if recv:
                 break
+        print("the unlock result is:", recv)
 
     def return_car(self, send_queue, recv_queue):
         booking_number = input("Please iuput your booking number:")
         print(booking_number)
         return_car_number = input("Please iuput your return car number:")
         print(return_car_number)
+        data = {
+            "cmd": "return_car",
+            "booking_number": booking_number,
+            "return_car_number": return_car_number,
+        }
+        try:
+            send_queue.put(data)
+        except:
+            traceback.print_exc()
+        while 1:
+            recv = recv_queue.get()
+            if recv:
+                break
+        print("the return result is:", recv)
 
 
 class Menu:
