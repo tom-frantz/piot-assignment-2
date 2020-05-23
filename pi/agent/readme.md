@@ -5,7 +5,7 @@
   export FLASK_ENV=development
   ```
 
-  Make sure your MySQL server process `mysqld` is running.
+  Make sure your MySQL server process `mysql` is running.
 
   install the python3 in your pi.
   ```
