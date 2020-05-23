@@ -2,6 +2,7 @@ import socketio
 import time
 import traceback
 import urllib
+import sys
 
 # sio = socketio.Client(engineio_logger=Fasle)
 sio = socketio.Client()
@@ -54,9 +55,13 @@ def op_unlock_car(sio, data):
         # print ("the data is:",data)
         # data = urllib.parse.urlencode(data)
         # req = urllib.request.Request(url, data)
-        res = sio.emit(
-            uri, data, callback=op_unlock_car_callback,
-        )
+        if GlobalConf.access_token is None:
+            print("please login first, system has shut down.")
+            sys.exit(0)
+        else:
+            res = sio.emit(
+                uri, data, callback=op_unlock_car_callback,
+            )
         print(data)
     except Exception as err:
         traceback.print_exc()
@@ -76,9 +81,13 @@ def op_return_car(sio, data):
         data["access_token"] = GlobalConf.access_token
         data["refrsh_token"] = GlobalConf.refresh_token
         uri = "return_car"
-        res = sio.emit(
-            uri, data, callback=op_return_car_callback,
-        )
+        if GlobalConf.access_token is None:
+            print("please login first, system has shut down.")
+            sys.exit(0)
+        else:
+            res = sio.emit(
+                uri, data, callback=op_return_car_callback,
+            )
 
     except Exception as err:
         traceback.print_exc()
