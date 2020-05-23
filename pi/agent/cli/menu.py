@@ -1,6 +1,7 @@
 import sys
 from master import socketio
 import traceback
+from datetime import datetime
 
 # import logging
 # logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
@@ -14,11 +15,18 @@ class Things:
         print(username)
         password = input("Please input your password:")
         print(password)
+        car_number = input("Please input your car number:")
+        print(car_number)
+        date = str(datetime.now())
         data = {
             "cmd": "login",
             "username": username,
             "password": password,
+            "car_number": car_number,
+            "time": date
+
         }
+        print(data)
         try:
             send_queue.put(data)
         except:
