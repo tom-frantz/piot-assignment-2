@@ -91,6 +91,12 @@ def op_return_car(sio, data):
 
 
 def op_return_car_callback(data):
+    print("op_return_car_callback output:", data)
+    res = data["return_permission"]
+    if res is True:
+        print("this car has been unlock")
+    else:
+        print("this car cannot be unlock.")
     GlobalConf.recv_queue.put(data)
 
 
