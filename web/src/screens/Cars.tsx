@@ -3,6 +3,7 @@ import axios from "axios";
 import Moment from "moment";
 import { Space, Table, Modal, DatePicker, Alert } from "antd";
 import { Car, formatCars, getColumnSearchProps, UnformattedCar } from "../utils/tableUtils";
+import ReactAddToCalendar from "react-add-to-calendar";
 
 const { RangePicker } = DatePicker;
 
@@ -40,13 +41,14 @@ const Cars: React.FC<CarsProps> = (props: CarsProps) => {
                             return;
                         }
                     }
-                    console.log(
-                        (selectedRange as [Moment.Moment, Moment.Moment])[0].format("YYYY-MM-DD") +
-                            "/" +
-                            (selectedRange as [Moment.Moment, Moment.Moment])[1].format(
-                                "YYYY-MM-DD"
-                            )
-                    );
+
+                    // console.log(
+                    //     (selectedRange as [Moment.Moment, Moment.Moment])[0].format("YYYY-MM-DD") +
+                    //         "/" +
+                    //         (selectedRange as [Moment.Moment, Moment.Moment])[1].format(
+                    //             "YYYY-MM-DD"
+                    //         )
+                    // );
 
                     axios
                         .post("http://127.0.0.1:5000/bookings/new", {
@@ -89,7 +91,32 @@ const Cars: React.FC<CarsProps> = (props: CarsProps) => {
                 />
                 {error && <p style={{ color: "#F00" }}>{error}</p>}
             </Modal>
-            {alert && <Alert message={alert} type="warning" closable onClose={() => {}} />}
+            {alert && (
+                <Alert
+                    type="warning"
+                    closable
+                    onClose={() => {}}
+                    message={
+                        <div>
+                            <p>Your booking has been added</p>
+                            <ReactAddToCalendar
+                                event={{
+                                    title: "Car Booking",
+                                    startTime: (selectedRange as [
+                                        Moment.Moment,
+                                        Moment.Moment
+                                    ])[0].toISOString(),
+                                    endTime: (selectedRange as [
+                                        Moment.Moment,
+                                        Moment.Moment
+                                    ])[1].toISOString(),
+                                    description: "Your booking time.",
+                                }}
+                            />
+                        </div>
+                    }
+                />
+            )}
             <Table
                 dataSource={cars}
                 columns={[
