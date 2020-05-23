@@ -23,6 +23,14 @@ def refresh(data):
         return error_response("The token was invalid")
 
 
+def user_unlock_car(data):
+    return data
+
+
+def user_return_car(data):
+    return data
+
+
 def check_user_exists(user):
     try:
         result = users.UserModel.query.filter_by(username=user).first()
