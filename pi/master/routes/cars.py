@@ -31,6 +31,11 @@ parser_available = reqparse.RequestParser()
 # A tuple of depature and return time in iso8601 format
 parser_available.add_argument('time_range', type=inputs.iso8601interval)
 
+parser_status = reqparse.RequestParser()
+parser_status.add_argument('car_number', type=inputs.regex('^[A-Za-z0-9]{1,6}$'), required=True)
+parser_status.add_argument('lock_status', type=inputs.boolean, required=True)
+parser_status.add_argument('latitude', type=validate.latitude_decimal)
+parser_status.add_argument('longitude', type=validate.longitude_decimal)
 
 class NewCar(Resource):
     @jwt_required
@@ -163,6 +168,9 @@ class SearchCars(Resource):
 
         try:
             result = cars.CarModel.query.filter_by(**request.args).all()
+            if result is None:
+                return {"Error": "car not found."}, 404
+ 
             filtered_cars = list(
                 map(
                     lambda item: {
@@ -187,6 +195,36 @@ class SearchCars(Resource):
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
+class CarStatus(Resource):
+    @jwt_required
+    def put(self):
+        args = parser_status.parse_args()
+
+        car_number = args['car_number']
+        lock_status = args['lock_status']
+        latitude = 0
+        longitude = 0
+        if args['latitude'] is not None and args['longitude'] is not None:
+            latitude = args['latitude']
+            longitude = args['longitude']
+
+        try:
+            car = cars.CarModel.query.filter_by(car_number=car_number).first()
+            if car is None:
+                return {"Error": "car not found."}, 404
+            car.lock_status =lock_status
+            if latitude != 0 and longitude !=0:
+                car.latitude = latitude
+                car.longitude = longitude
+            db.session.commit()
+            return {
+                "car_number": car_number,
+                "lock_status": lock_status
+                }, 200
+
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return {'message': error}, 500
 
 class AllCars(Resource):
     @jwt_required
@@ -232,4 +270,5 @@ api.add_resource(NewCar, '/cars/new')
 api.add_resource(CarDetail, '/cars/detail/<string:car_number>')
 api.add_resource(AvailableCars, '/cars/available')
 api.add_resource(SearchCars, '/cars/search')
+api.add_resource(CarStatus, '/cars/status')
 api.add_resource(AllCars, '/cars/all')
