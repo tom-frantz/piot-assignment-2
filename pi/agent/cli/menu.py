@@ -53,9 +53,9 @@ class Things:
         return_car_number = input("Please iuput your return car number:")
         print(return_car_number)
         data = {
-            "cmd": "unlock_car",
+            "cmd": "return_car",
             "booking_number": booking_number,
-            "car_number": car_number,
+            "return_car_number": return_car_number,
         }
         try:
             send_queue.put(data)

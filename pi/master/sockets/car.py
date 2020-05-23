@@ -10,7 +10,7 @@ debug = True
 @socketio.on("unlock_car")
 def unlock_car(data):
     #    booking_number = data['booking_number']
-    car_number = data['car_number']
+    car_number = data["car_number"]
     try:
         result = cars.CarModel.query.filter_by(
             car_number=car_number, lock_status=True).first()
