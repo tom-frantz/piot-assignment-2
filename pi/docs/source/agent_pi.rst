@@ -1,4 +1,4 @@
-Agent PI main
-=============
-.. automodule:: agent_pi
-   :members:
+agent_pi.py
+===========
+
+Driver class for :ref:`agent-folder`.
