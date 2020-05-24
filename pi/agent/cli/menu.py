@@ -1,5 +1,7 @@
 import sys
 from master import socketio
+import recogniser
+import cv2
 import traceback
 from datetime import datetime
 
@@ -36,6 +38,24 @@ class Things:
             if recv:
                 break
         print("the login result is:", recv)
+
+    def facial_recog_login(self, send_queue, recv_queue):
+        recog = recogniser.Facialrecog()
+        username = input("Enter username:")
+        is_same_person = False
+        cap = cv2.VideoCapture(0)
+        if cap is None or not cap.isOpened():
+            imgpath = input("Enter img name:")
+            import_img_path = "pi/agent/facial_recognition/import/" + imgpath
+            img = cv2.imread(import_img_path)
+            is_same_person = recog.recog_image(username, img)
+        else:
+            is_same_person = recog.once_time_recog(username)
+        
+        if not is_same_person:
+            print("Face not recognised")
+            return
+        #login to pi
 
     def unlock_car(self, send_queue, recv_queue):
         booking_number = input("Please iuput your booking number:")
@@ -82,9 +102,10 @@ class Menu:
         self.choices = {
 
             "1": self.thing.login,
-            "2": self.thing.unlock_car,
-            "3": self.thing.return_car,
-            "4": self.quit,
+            "2": self.thing.facial_recog_login,
+            "3": self.thing.unlock_car,
+            "4": self.thing.return_car,
+            "5": self.quit,
         }
 
     def display_menu(self):
@@ -92,9 +113,10 @@ class Menu:
             """
                  Operation Menu:
                  1. Login
-                 2. Unlock Car
-                 3. Return Car
-                 4. Quit"""
+                 2. Login with facial recognition
+                 3. Unlock Car
+                 4. Return Car
+                 5. Quit"""
         )
 
     def run(self, send_queue, recv_queue):
