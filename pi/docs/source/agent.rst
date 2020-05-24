@@ -11,6 +11,7 @@ Subpackages
 
    agent.cli
    agent.sockets
+   agent.facial_recognition
 
 Module contents
 ---------------

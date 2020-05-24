@@ -57,11 +57,6 @@ class NewCar(Resource):
         colour = args['colour']
         seats = args['seats']
         cost_per_hour = args['cost_per_hour']
-        
-        print("seats", flush=True)
-        print(type(seats), flush=True)
-        print("cost per hour")
-        print(type(cost_per_hour), flush=True)
 
         # optional request arguments by default
         latitude = -37.804663448
@@ -77,9 +72,6 @@ class NewCar(Resource):
         if args['lock_status'] is not None:
             lock_status = args['lock_status']
 
-        print(type(longitude), flush=True)
-        print(type(latitude), flush=True)
-
         new_car = cars.CarModel(
             car_number=car_number,
             make=make,
@@ -93,7 +85,6 @@ class NewCar(Resource):
         )
 
         try:
-            print("SAVE TO DB START", flush=True)
             new_car.save_to_db()
             return (
                 {
@@ -128,7 +119,6 @@ class CarDetail(Resource):
         """
         try:
             inputs.regex('^[A-Za-z0-9]{1,6}$')(car_number)
-            print(car_number, flush=True)
             car_number = car_number.upper()
             result = cars.CarModel.query.filter_by(car_number=car_number).first()
             return (

@@ -1,3 +1,7 @@
+"""
+Driver class for Agent Pi
+"""
+
 from agent.cli.menu import Menu
 from agent.sockets.operation import *
 import threading,queue
@@ -7,6 +11,13 @@ send_queue = queue.Queue()
 recv_queue = queue.Queue()
 
 def start():
+    """
+    Two threads operation:
+
+    1. Menu thread
+    2. Socket client thread
+    """
+    
     t1 = threading.Thread(target=Menu().run, args=(send_queue,recv_queue))
     t2 = threading.Thread(target=client_start, args=(send_queue,recv_queue))
     t2.start()

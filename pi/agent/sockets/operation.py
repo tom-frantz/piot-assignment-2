@@ -1,3 +1,7 @@
+"""
+Queue message and callback operations.
+"""
+
 import socketio
 import time
 import traceback
@@ -23,41 +27,20 @@ class GlobalConf(object):
 Global_url = "http://127.0.0.1:5000/{}"
 Global_return_queue = None
 
-# @sio.event
-# def message(data):
-#     print('I received a message!')
-
-# @sio.on('success')
-# def on_message(data):
-#     print(data)
-#     print('I received a message!')
-
-
-# @sio.event
-# def connect():
-#     print("I'm connected!")
-
-# @sio.event
-# def connect_error():
-#     print("The connection failed!")
-
-# @sio.event
-# def disconnect():
-#     print("I'm disconnected!")
-
 def op_unlock_car(sio, data):
+    """
+    Unlock car message.
+    """
     try:
         data["access_token"] = GlobalConf.access_token
         data["refrsh_token"] = GlobalConf.refresh_token
         uri = "unlock_car"
-        print("into op")
         if GlobalConf.access_token is None:
-            print("please login first, system has shut down.")
+            print("Please login first, system is to shut down.")
             sys.exit(0)
         else:
-            print("into emit")
             res = sio.emit(
-                uri, data
+                uri, data, callback=op_unlock_car_callback(data)
             )
         print(data)
     except Exception as err:
@@ -69,21 +52,24 @@ def op_unlock_car(sio, data):
 
 
 def op_unlock_car_callback(data):
-    print("op_unlock_car_callback output:", data)
+    print("op_unlock_car_callback in process")
     GlobalConf.recv_queue.put(data)
 
 
 def op_return_car(sio, data):
+    """
+    Return car message.
+    """
     try:
         data["access_token"] = GlobalConf.access_token
         data["refrsh_token"] = GlobalConf.refresh_token
         uri = "return_car"
         if GlobalConf.access_token is None:
-            print("please login first, system has shut down.")
+            print("Please login first, system is to shut down.")
             sys.exit(0)
         else:
             res = sio.emit(
-                uri, data
+                uri, data, callback=op_return_car_callback(data)
             )
     except Exception as err:
         traceback.print_exc()
@@ -94,7 +80,7 @@ def op_return_car(sio, data):
 
 
 def op_return_car_callback(data):
-    print("op_return_car_callback output:", data)
+    print("op_return_car_callback in process.")
     GlobalConf.recv_queue.put(data)
 
 
@@ -109,7 +95,11 @@ def refresh(socket):
 
 
 def op_login(sio, data):
-    # cmd,data = "login", {"username": "user", "password": "password"}
+    """
+    Return data formate:
+    
+    `cmd,data = "login", {"username": "user", "password": "password"}`
+    """
     try:
         res = sio.emit(
             "login", data, callback=op_login_callback,
@@ -129,6 +119,9 @@ def op_login_callback(data):
 
 
 def client_start(send_queue, recv_queue):
+    """
+    Client menu command patterns.
+    """
     sio.connect('http://localhost:5000')
     # sio.wait()
     GlobalConf.recv_queue = recv_queue

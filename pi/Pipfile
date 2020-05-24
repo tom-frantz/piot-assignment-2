@@ -19,6 +19,8 @@ flask-cors = "*"
 simplejson = "*"
 pytest = "*"
 sphinx = "*"
+cv2 = "*"
+opencv-python = "*"
 
 [requires]
 python_version = "3.8"

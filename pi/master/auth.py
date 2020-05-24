@@ -1,9 +1,3 @@
-"""A module which contains help methods to verify:
-
-1. if a user exists
-2. if the password submitted matches what's in the database
-"""
-
 from flask_restful import abort
 from master.models import users
 from passlib.handlers.pbkdf2 import pbkdf2_sha256 as sha256

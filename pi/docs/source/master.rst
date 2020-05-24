@@ -16,14 +16,6 @@ Subpackages
 Submodules
 ----------
 
-master.auth module
-------------------
-
-.. automodule:: master.auth
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 master.config module
 --------------------
 

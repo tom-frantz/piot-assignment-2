@@ -10,19 +10,16 @@ from master import db
 def unlock_car(data):
     car_number = data["car_number"]
     try:
-        print("start db commit", flush=True)
         result = cars.CarModel.query.filter_by(car_number=car_number).first()
-        result.lock_status = True
-        db.session.commit()
-        print("end of db commit")
+        
         if result is None:
-            print('result 401', flush=True)
-            return 401,'result has no return value'
+            return 401, 'There\'s no such car in database.'
         else:
-            print('result 100', flush=True)
-            return 100,'result has value'
+            result.lock_status = False
+            db.session.commit()
+            return 100, 'Car unlocked successfully.'
+    
     except Exception as e:
-        print('result 500', flush=True)
         error = str(e.__dict__['orig'])
         return 500, error
 
@@ -32,12 +29,12 @@ def return_car(data):
     car_number = data["return_car_number"]
     try:
         result = cars.CarModel.query.filter_by(car_number=car_number).first()
-        result.lock_status = False
-        db.session.commit()
-        if result is False:
-            return 'this car status is not renting.'
+        if result.lock_status is True:
+            return 'this car is locked or not being rented.'
         else:
-            return 'this car return successfully'
+            result.lock_status = True
+            db.session.commit()
+            return 'This car is returned successfully'
     except Exception as e:
         error = str(e.__dict__['orig'])
         return error

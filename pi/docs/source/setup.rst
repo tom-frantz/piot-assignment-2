@@ -92,9 +92,12 @@ Agent Pi
 
 3. Go to project folder, install required packages, and start backend server.
 
+*OpenCV (cv2)* package requires Python 3.7 or less.
+
 .. code-block:: bash
 
    $ cd {project_root_folder}/pi
    $ pipenv install 
+   $ pipenv install opencv-python
    $ pipenv shell
    $ flask run
