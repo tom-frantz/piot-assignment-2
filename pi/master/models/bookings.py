@@ -5,6 +5,16 @@ from master.models.users import UserModel
 
 
 class BookingModel(db.Model):
+    """
+    Bookings table schema and validation rules.
+
+    :param int booking_id: primary key, auto-increment
+    :param str car_number: foreign key, required.
+    :param str username: foreign key, required.
+    :param datetime departure_time: required.
+    :param datetime return_time: required.
+    """
+
     __tablename__ = 'Bookings'
 
     booking_id = db.Column(
@@ -21,5 +31,8 @@ class BookingModel(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def save_to_db(self):
+        """
+        Save session to database.
+        """
         db.session.add(self)
         db.session.commit()

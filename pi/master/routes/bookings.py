@@ -1,3 +1,7 @@
+"""
+RESTful API Routes: `/auth/{endpoint}`
+"""
+
 from flask_restful import reqparse, abort, Resource, inputs
 from flask_jwt_extended import (
     jwt_required,
@@ -20,6 +24,9 @@ parser_new.add_argument('booking_period', type=inputs.iso8601interval)
 
 
 def validate_booking_period(car_number, departure_time, return_time):
+    """
+    A help method to valid if a car is available in a certain time range.
+    """
     try:
         result = bookings.BookingModel.query.filter_by(car_number=car_number).all()
         if result is None:
@@ -54,8 +61,15 @@ def validate_booking_period(car_number, departure_time, return_time):
 
 
 class MyBookedCars(Resource):
+    """
+    List of all the booked cars of the current user.
+    """
     @jwt_required
     def get(self):
+        """
+        - JWT required.
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         current_user = get_jwt_identity()
         username = current_user['username']
         try:
@@ -79,8 +93,18 @@ class MyBookedCars(Resource):
 
 
 class NewBooking(Resource):
+    """
+    Add a new booking.
+    """
     @jwt_required
     def post(self):
+        """
+        :param str car_number: required
+        :param tuple booking_period: required, a pair of datetime values
+
+        - JWT required.
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         current_user = get_jwt_identity()
         username = current_user['username']
 
@@ -114,9 +138,17 @@ class NewBooking(Resource):
 
 
 class CancelBooking(Resource):
+    """
+    Cancel a booking by Booking ID
+    """
     @jwt_required
     def delete(self, booking_id):
+        """
+        :param int booking_id: required as url paramemter
 
+        - JWT required.
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         try:
             result_booking = bookings.BookingModel.query.filter_by(
                 booking_id=booking_id

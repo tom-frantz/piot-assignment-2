@@ -13,14 +13,18 @@ def login(data):
     if ok != 200:
         return error_response(res)
 
-    hashed_password = res.hashed_password
+    hashed_password = res
 
     ok, msg = verify_password(password, hashed_password)
     if not ok:
         return error_response(msg)
 
-    access_token = create_access_token(identity=username)
-    refresh_token = create_refresh_token(identity=username)
+    identity = {
+        "username": username,
+        "role": "user"
+    }
+    access_token = create_access_token(identity=identity)
+    refresh_token = create_refresh_token(identity=identity)
     return success_response(
         username=username, access_token=access_token, refresh_token=refresh_token,
     )

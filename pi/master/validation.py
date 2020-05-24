@@ -1,3 +1,7 @@
+"""
+Help methods for customised data validation.
+"""
+
 import decimal
 
 

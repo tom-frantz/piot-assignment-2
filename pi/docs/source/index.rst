@@ -7,10 +7,10 @@ Welcome to the documentation for PIOT Assignment 2!
 ===================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
-   agent_pi
+   modules
 
 
 Indices and tables

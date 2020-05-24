@@ -1,5 +1,12 @@
-import os
+"""
+Flask App config profiles for:
 
+- Development
+- Testing
+- Production
+"""
+
+import os
 
 class Config(object):
     DEBUG = False
@@ -26,20 +33,17 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
 
-    DB_PASSWORD = os.environ["My_SQL"]
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:{}@127.0.0.1:3306/CarShare'.format(
-        DB_PASSWORD
-    )
+    # DB_PASSWORD = os.environ["My_SQL"]
+    # SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:{}@127.0.0.1:3306/CarShare'.format(
+    #     DB_PASSWORD
+    # )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True
 
 
 class TestingConfig(Config):
     TESTING = True
-
-    DB_PASSWORD = os.environ["My_SQL"]
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:{}@127.0.0.1:3306/CarShare'.format(
-        DB_PASSWORD
-    )
+    JWT_SECRET_KEY = 'jwt_testing'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///test/test.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True

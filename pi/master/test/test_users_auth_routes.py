@@ -7,8 +7,6 @@ from passlib.hash import pbkdf2_sha256 as sha256
 import datetime
 
 from master import app, db
-
-# import master
 from flask_jwt_extended import create_access_token, create_refresh_token
 
 
@@ -34,20 +32,6 @@ def client():
 
     yield client
 
-
-# @pytest.fixture
-# def app(mocker):
-#     mocker.patch("flask_sqlalchemy.SQLAlchemy.drop_all", return_value=True)
-#     mocker.patch("flask_sqlalchemy.SQLAlchemy.create_all", return_value=True)
-#     # mocker.patch("flask_sqlalchemy.SQLAlchemy.orm.session.add", return_value=True)
-#     #mocker.patch("master.models.users.UserModel.add_new_record", return_value=True)
-#     mocker.patch('flask_jwt_extended.view_decorators.verify_jwt_in_request', return_value=True)
-#     # mock = mocker.MagicMock(dict(username='user01', role='user'))
-#     # mocker.patch("flask_jwt_extended.utils.get_jwt_identity", mock)
-#     app = master.app
-#     return app
-
-
 def test_api_root(client):
     res = client.get("/")
     assert res.status_code == 200
@@ -64,10 +48,6 @@ def test_register_user_valid(client):
             email='user02@email.com',
         ),
     )
-    # result = utils.convert_byte_to_dict(res.data)
-    # assert result['username'] == 'user02'
-    # assert result['access_token'] != None
-    # assert result['refresh_token'] != None
     assert res.status_code == 201
 
 
@@ -123,43 +103,3 @@ def test_token_refresh(client):
         result = utils.convert_byte_to_dict(res.data)
         assert result['access_token'] != None
         assert res.status_code == 201
-
-
-# def test_token_refresh_invalid(client):
-#     token = "alsdjfkldjkfjdsjflkjdsfjldfkslfaj"
-
-#     res = client.post('/auth/refresh', headers = {"Authorization": "Bearer {}".format(token)})
-#     result = utils.convert_byte_to_dict(res.data)
-#     print(result)
-#     print(res.status_code)
-# assert result['access_token'] != None
-# assert res.status_code == 201
-
-# def test_change_password_valid(client):
-#     identity = {'username': 'user01', 'role': 'user'}
-#     token = ""
-#     with app.test_request_context('/auth/password'):
-#         token = create_access_token(identity=identity)
-#         res = client.post(
-#             '/auth/password',
-#             data=dict(old_password='password01', new_password='newpass01'),
-#             headers = {"Authorization": "Bearer {}".format(token)})
-#         result = utils.convert_byte_to_dict(res.data)
-#         assert result['access_token'] != None
-#         assert res.status_code == 201
-
-# TODO Fix password validation
-# def test_change_password_invalid(client):
-#     identity = {'username': 'user01', 'role': 'user'}
-#     token = ""
-#     with app.test_request_context('/auth/password'):
-#         token = create_access_token(identity=identity)
-#         res = client.post(
-#             '/auth/password',
-#             data=dict(old_password='wrong_password', new_password='newpass01'),
-#             headers = {"Authorization": "Bearer {}".format(token)})
-#         result = utils.convert_byte_to_dict(res.data)
-#         print(result)
-#         print("************")
-# assert result['access_token'] != None
-# assert res.status_code == 201

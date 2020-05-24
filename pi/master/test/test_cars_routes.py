@@ -7,8 +7,6 @@ import datetime
 import decimal
 
 from master import app, db
-
-# import master
 from flask_jwt_extended import create_access_token, create_refresh_token
 
 
@@ -66,7 +64,6 @@ def test_add_new_car(client):
         # print(result)
         # print("*****************")
         assert result['message'] != None
-
 
 def test_get_car_detail(client):
     identity = {'username': 'user01'}
