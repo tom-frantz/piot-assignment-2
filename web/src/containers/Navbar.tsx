@@ -18,7 +18,14 @@ const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
                 <Menu.Item key="/cars">
                     <Link to={"/cars"}>Cars</Link>
                 </Menu.Item>,
+                <Menu.Item key="/bookings">
+                    <Link to={"/bookings"}>Bookings</Link>
+                </Menu.Item>,
+                <Menu.Item key="/map">
+                    <Link to={"/map"}>Map</Link>
+                </Menu.Item>,
                 <Menu.Item
+                    style={{ float: "right" }}
                     key="something"
                     onClick={() => {
                         props.setAuth(undefined);

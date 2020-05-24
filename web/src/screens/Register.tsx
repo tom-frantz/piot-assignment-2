@@ -1,5 +1,5 @@
 import React, { SetStateAction } from "react";
-import { Layout, Form, Input, Button } from "antd";
+import { Layout, Form, Input, Button, notification } from "antd";
 import axios from "axios";
 import { Auth, getAuthTimer } from "../App";
 import { withRouter, RouteComponentProps } from "react-router-dom";
@@ -10,6 +10,15 @@ interface RegisterProps extends RouteComponentProps<{}> {
 
 const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
     const [form] = Form.useForm();
+
+    const openNotification = () => {
+        const args = {
+            message: "Error",
+            description: "There was an error with registration",
+            duration: 0,
+        };
+        notification.open(args);
+    };
 
     const onFinish = ({ username, first_name, last_name, email, password }: any) => {
         axios
@@ -31,8 +40,10 @@ const Register: React.FC<RegisterProps> = (props: RegisterProps) => {
                 props.history.push("/cars");
             })
             .catch((error) => {
-                if (error.response.data.message) {
+                if (error.response?.data.message) {
                     form.setFields([{ name: "username", errors: [error.response.data.message] }]);
+                } else {
+                    openNotification();
                 }
             });
     };

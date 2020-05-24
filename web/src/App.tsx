@@ -1,5 +1,8 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import "antd/dist/antd.css";
+import "react-date-range/dist/styles.css"; // main style file
+import "react-date-range/dist/theme/default.css"; // theme css file
+
 import { Route, Router, Switch, Redirect } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import { Layout } from "antd";
@@ -10,6 +13,8 @@ import Cars from "./screens/Cars";
 import Navbar from "./containers/Navbar";
 import PrivateRoute from "./containers/PrivateRoute";
 import Register from "./screens/Register";
+import Bookings from "./screens/Bookings";
+import MyMap from "./screens/MyMap";
 
 const { Content, Header, Footer } = Layout;
 
@@ -106,6 +111,12 @@ function AppNavigator() {
                         </Route>
                         <PrivateRoute auth={auth !== undefined} path={"/cars"} exact>
                             <Cars />
+                        </PrivateRoute>
+                        <PrivateRoute auth={auth !== undefined} path={"/bookings"} exact>
+                            <Bookings />
+                        </PrivateRoute>
+                        <PrivateRoute auth={auth !== undefined} path={"/map"} exact>
+                            <MyMap />
                         </PrivateRoute>
                     </Switch>
                 </Content>

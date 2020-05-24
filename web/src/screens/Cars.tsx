@@ -1,160 +1,184 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Table, Space, Input, Button } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import Moment from "moment";
+import { Space, Table, Modal, DatePicker, Alert } from "antd";
+import { Car, formatCars, getColumnSearchProps, UnformattedCar } from "../utils/tableUtils";
+import ReactAddToCalendar from "react-add-to-calendar";
+
+const { RangePicker } = DatePicker;
 
 interface CarsProps {}
 
-export type Car = {
-    number_plate: string;
-    make: string;
-    body_type: string;
-    colour: string;
-    seats: number;
-    location: [number, number];
-    cost: number;
-};
-
 const Cars: React.FC<CarsProps> = (props: CarsProps) => {
-    const [searchText, setSearchText] = useState<string>("");
-    const [searchedColumn, setSearchedColumn] = useState<string>("");
+    const [cars, setCars] = useState<Car[]>([]);
+    const [visible, setVisible] = useState<boolean>(false);
+    const [error, setError] = useState<string | undefined>(undefined);
+    const [alert, setAlert] = useState<string | undefined>();
 
-    const [cars, setCars] = useState<Car[]>([
-        {
-            number_plate: "sqb981",
-            make: "RX-8",
-            body_type: "sports",
-            colour: "red",
-            seats: 4,
-            location: [0, 0],
-            cost: 100,
-        },
-        {
-            number_plate: "sqb981",
-            make: "RX-9",
-            body_type: "sports",
-            colour: "red",
-            seats: 4,
-            location: [0, 0],
-            cost: 100,
-        },
-        {
-            number_plate: "sqb981",
-            make: "RX-8",
-            body_type: "sports",
-            colour: "green",
-            seats: 4,
-            location: [0, 0],
-            cost: 100,
-        },
-    ]);
+    const [selectedRange, setSelectedRange] = useState<[Moment.Moment, Moment.Moment]>();
+    const [selectedCar, setSelectedCar] = useState<Car | undefined>(undefined);
 
     useEffect(() => {
-        console.log("axios");
-        axios.get("http://127.0.0.1:5000/cars/available").then((value: { data: Car[] }) => {
-            console.log(value.data);
+        axios.get("http://127.0.0.1:5000/cars/all").then((value: { data: UnformattedCar[] }) => {
+            setCars(value.data.map(formatCars));
         });
     }, []);
 
-    const getColumnSearchProps = (dataIndex: string) => ({
-        filterDropdown: ({
-            setSelectedKeys,
-            selectedKeys,
-            confirm,
-            clearFilters,
-        }: {
-            setSelectedKeys: any;
-            selectedKeys: any;
-            confirm: any;
-            clearFilters: any;
-        }) => (
-            <div style={{ padding: 8 }}>
-                <Input
-                    placeholder={`Search ${dataIndex}`}
-                    value={selectedKeys[0]}
-                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                    onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-                    style={{ width: 188, marginBottom: 8, display: "block" }}
-                />
-                <Space>
-                    <Button
-                        type="primary"
-                        onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-                        icon={<SearchOutlined />}
-                        size="small"
-                        style={{ width: 90 }}
-                    >
-                        Search
-                    </Button>
-                    <Button
-                        onClick={() => handleReset(clearFilters)}
-                        size="small"
-                        style={{ width: 90 }}
-                    >
-                        Reset
-                    </Button>
-                </Space>
-            </div>
-        ),
-        filterIcon: (filtered: unknown) => (
-            <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-        ),
-        onFilter: (value: any, record: { [key: string]: any }) =>
-            record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    });
-
-    const handleSearch = (selectedKeys: string, confirm: () => {}, dataIndex: string) => {
-        confirm();
-        setSearchedColumn(dataIndex);
-        setSearchText(selectedKeys[0]);
-    };
-
-    const handleReset = (clearFilters: () => void) => {
-        clearFilters();
-        setSearchText("");
-    };
-
     return (
-        <Table
-            dataSource={cars}
-            columns={[
-                {
-                    title: "Number Plate",
-                    dataIndex: "number_plate",
-                    key: "numberPlate",
-                    ...getColumnSearchProps("number_plate"),
-                },
-                { title: "Make", dataIndex: "make", key: "make", ...getColumnSearchProps("make") },
-                {
-                    title: "Body Type",
-                    dataIndex: "body_type",
-                    key: "bodyType",
-                    ...getColumnSearchProps("body_type"),
-                },
-                {
-                    title: "Colour",
-                    dataIndex: "colour",
-                    key: "colour",
-                    ...getColumnSearchProps("colour"),
-                },
-                {
-                    title: "Seats",
-                    dataIndex: "seats",
-                    key: "seats",
-                    ...getColumnSearchProps("seats"),
-                },
-                { title: "Cost", dataIndex: "cost", key: "cost", ...getColumnSearchProps("cost") },
-                {
-                    title: "Actions",
-                    key: "actions",
-                    render: (text, record) => (
-                        <Space>
-                            <a>Book</a>
-                        </Space>
-                    ),
-                },
-            ]}
-        />
+        <div style={{ display: "flex", flexDirection: "column" }}>
+            <Modal
+                visible={visible}
+                onCancel={() => setVisible(false)}
+                onOk={() => {
+                    for (const booking of (selectedCar as Car).bookings) {
+                        if (
+                            Moment(booking.departure_time) <=
+                                (selectedRange as [Moment.Moment, Moment.Moment])[1] &&
+                            Moment(booking.return_time) >=
+                                (selectedRange as [Moment.Moment, Moment.Moment])[0]
+                        ) {
+                            setError("You can't use that date period");
+                            return;
+                        }
+                    }
+
+                    // console.log(
+                    //     (selectedRange as [Moment.Moment, Moment.Moment])[0].format("YYYY-MM-DD") +
+                    //         "/" +
+                    //         (selectedRange as [Moment.Moment, Moment.Moment])[1].format(
+                    //             "YYYY-MM-DD"
+                    //         )
+                    // );
+
+                    axios
+                        .post("http://127.0.0.1:5000/bookings/new", {
+                            car_number: (selectedCar as Car).car_number,
+                            booking_period:
+                                (selectedRange as [Moment.Moment, Moment.Moment])[0].format(
+                                    "YYYY-MM-DD"
+                                ) +
+                                "/" +
+                                (selectedRange as [Moment.Moment, Moment.Moment])[1].format(
+                                    "YYYY-MM-DD"
+                                ),
+                        })
+                        .then((res) => setAlert(res.data.message))
+                        .catch((err) => setAlert(err.message));
+
+                    setVisible(false);
+                }}
+            >
+                <RangePicker
+                    disabledDate={(current) => {
+                        for (const booking of (selectedCar as Car).bookings) {
+                            if (
+                                Moment(booking.departure_time) <= current &&
+                                current <= Moment(booking.return_time)
+                            ) {
+                                return true;
+                            }
+                        }
+                        // Can not select days before today and today
+                        return current && current < Moment().endOf("day");
+                    }}
+                    value={selectedRange}
+                    onChange={(values) => {
+                        console.log(values);
+                        setError(undefined);
+                        // @ts-ignore
+                        setSelectedRange(values);
+                    }}
+                />
+                {error && <p style={{ color: "#F00" }}>{error}</p>}
+            </Modal>
+            {alert && (
+                <Alert
+                    type="warning"
+                    closable
+                    onClose={() => {}}
+                    message={
+                        <div>
+                            <p>Your booking has been added</p>
+                            <ReactAddToCalendar
+                                event={{
+                                    title: "Car Booking",
+                                    startTime: (selectedRange as [
+                                        Moment.Moment,
+                                        Moment.Moment
+                                    ])[0].toISOString(),
+                                    endTime: (selectedRange as [
+                                        Moment.Moment,
+                                        Moment.Moment
+                                    ])[1].toISOString(),
+                                    description: "Your booking time.",
+                                }}
+                            />
+                        </div>
+                    }
+                />
+            )}
+            <Table
+                dataSource={cars}
+                columns={[
+                    {
+                        title: "Number Plate",
+                        dataIndex: "car_number",
+                        key: "numberPlate",
+                        ...getColumnSearchProps("car_number"),
+                    },
+                    {
+                        title: "Make",
+                        dataIndex: "make",
+                        key: "make",
+                        ...getColumnSearchProps("make"),
+                    },
+                    {
+                        title: "Body Type",
+                        dataIndex: "body_type",
+                        key: "bodyType",
+                        ...getColumnSearchProps("body_type"),
+                    },
+                    {
+                        title: "Colour",
+                        dataIndex: "colour",
+                        key: "colour",
+                        ...getColumnSearchProps("colour"),
+                    },
+                    {
+                        title: "Seats",
+                        dataIndex: "seats",
+                        key: "seats",
+                        ...getColumnSearchProps("seats"),
+                    },
+                    {
+                        title: "Cost",
+                        dataIndex: "cost_per_hour",
+                        key: "cost",
+                        ...getColumnSearchProps("cost_per_hour"),
+                    },
+                    {
+                        title: "Actions",
+                        key: "actions",
+                        render: (text, record) => {
+                            console.log(text, record);
+
+                            return (
+                                <Space>
+                                    <a
+                                        onClick={() => {
+                                            setVisible(true);
+                                            setSelectedCar(record);
+                                        }}
+                                    >
+                                        Book
+                                    </a>
+                                </Space>
+                            );
+                        },
+                    },
+                ]}
+            />
+        </div>
     );
 };
 

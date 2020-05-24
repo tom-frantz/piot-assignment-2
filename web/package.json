@@ -15,7 +15,11 @@
     "@types/react-router-dom": "^5.1.5",
     "antd": "^4.2.0",
     "axios": "^0.19.2",
+    "date-fns": "^2.14.0",
+    "google-maps-react": "^2.0.6",
     "react": "^16.13.1",
+    "react-add-to-calendar": "^0.1.5",
+    "react-date-range": "^1.0.3",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
@@ -43,6 +47,8 @@
     ]
   },
   "devDependencies": {
+    "@types/react-add-to-calendar": "^0.1.0",
+    "@types/react-date-range": "^0.94.4",
     "prettier": "^2.0.5"
   }
 }

@@ -21,8 +21,7 @@ parser_new.add_argument('booking_period', type=inputs.iso8601interval)
 
 def validate_booking_period(car_number, departure_time, return_time):
     try:
-        result = bookings.BookingModel.query.filter_by(
-            car_number=car_number).all()
+        result = bookings.BookingModel.query.filter_by(car_number=car_number).all()
         if result is None:
             pass
         else:
@@ -36,8 +35,10 @@ def validate_booking_period(car_number, departure_time, return_time):
                     or i.departure_time.date()
                     <= return_time.date()
                     <= i.return_time.date()
-                    or (i.departure_time.date() <= departure_time.date()
-                        and i.return_time.date() >= return_time.date())
+                    or (
+                        i.departure_time.date() <= departure_time.date()
+                        and i.return_time.date() >= return_time.date()
+                    )
                 ):
                     abort(
                         403,
@@ -124,11 +125,7 @@ class CancelBooking(Resource):
 
             db.session.commit()
             return (
-                {
-                    'message': "Your booking {} has been canceled.".format(
-                        booking_id
-                    )
-                },
+                {'message': "Your booking {} has been canceled.".format(booking_id)},
                 200,
             )
         except SQLAlchemyError as e:
