@@ -36,7 +36,8 @@ import master.sockets
 
 
 # create database (if not exist) before first api request
-# @app.before_first_request
-# def create_tables():
-#     db.drop_all()
-#     db.create_all()
+@app.before_first_request
+def create_tables():
+    if app.config['TESTING'] is False or app.config["PRODUCTION"] is False:
+        db.drop_all()
+        db.create_all()

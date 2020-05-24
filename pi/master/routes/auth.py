@@ -31,14 +31,14 @@ parser_change_password.add_argument(
 
 
 def check_user(current_user, password):
-    code, result = check_user_exists(current_user)
+    code, result = check_user_exists(current_user)  # return status code + password
     if code != 200:
         abort(code, message=result)
-    stored_password = result.password
+    stored_password = result
     ok, msg = verify_password(password, stored_password)
     if not ok:
         abort(401, message=msg)
-    return result
+    return True
 
 
 class AccessToken(Resource):
@@ -65,7 +65,8 @@ class TokenRefresh(Resource):
     @jwt_refresh_token_required
     def post(self):
         current_user = get_jwt_identity()  # extract identity from refresh token
-        code, res = check_user_exists(current_user)
+        username = current_user['username']
+        code, res = check_user_exists(username)
 
         if code != 200:
             abort(code, message=res)
@@ -78,11 +79,12 @@ class ChangePassword(Resource):
     @jwt_required
     def post(self):
         current_user = get_jwt_identity()
+        username = current_user['username']
         args = parser_change_password.parse_args()
         old_password = args['old_password']
         new_password = args['new_password']
 
-        result = check_user_exists(current_user)
+        result = check_user_exists(username)  # password string
         stored_password = result.password
         verify_password(old_password, stored_password)
 
@@ -90,8 +92,9 @@ class ChangePassword(Resource):
             # user = users.UserModel.query.filter_by(username=current_user).first()
             result.password = sha256.hash(new_password)
             db.session.commit()
-            access_token = create_access_token(identity=result.username)
-            refresh_token = create_refresh_token(identity=result.username)
+            identity = {'username': result.username, 'role': result.role}
+            access_token = create_access_token(identity=identity)
+            refresh_token = create_refresh_token(identity=identity)
             return {'access_token': access_token, "refresh_token": refresh_token}, 201
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])

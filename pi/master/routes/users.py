@@ -14,18 +14,20 @@ from master.models import users
 
 parser = reqparse.RequestParser(bundle_errors=True)
 parser.add_argument(
-    'username', type=inputs.regex('^[A-Za-z0-9-_]{3,15}$'), required=True
-)
-parser.add_argument('password', type=inputs.regex('^[A-Za-z0-9]{8,30}$'), required=True)
-parser.add_argument(
-    'first_name', type=inputs.regex('^[A-Za-z0-9-_]{1,30}$'), required=True
+    'username', type=inputs.regex(r'^[A-Za-z0-9-_]{3,15}$'), required=True
 )
 parser.add_argument(
-    'last_name', type=inputs.regex('^[A-Za-z0-9-_]{1,30}$'), required=True
+    'password', type=inputs.regex(r'^[A-Za-z0-9]{8,30}$'), required=True
+)
+parser.add_argument(
+    'first_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$'), required=True
+)
+parser.add_argument(
+    'last_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$'), required=True
 )
 parser.add_argument(
     'email',
-    type=inputs.regex('^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$'),
+    type=inputs.regex(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$'),
     required=True,
 )
 
@@ -52,8 +54,9 @@ class Register(Resource):
         check_duplicate_user(username)
 
         hashed_password = sha256.hash(password)
-        access_token = create_access_token(identity=username)
-        refresh_token = create_refresh_token(identity=username)
+        user_identity = {'username': username, 'role': 'user'}
+        access_token = create_access_token(identity=user_identity)
+        refresh_token = create_refresh_token(identity=user_identity)
 
         # database new record
         new_user = users.UserModel(
@@ -82,16 +85,20 @@ class Profile(Resource):
     @jwt_required
     def get(self):
         current_user = get_jwt_identity()
+        username = current_user['username']
         try:
-            result = users.UserModel.query.filter_by(username=current_user).first()
+            result = users.UserModel.query.filter_by(username=username).first()
+            if result is None:
+                return {'Error': 'User not found'}, 404
             return {
                 'username': result.username,
                 'first_name': result.first_name,
                 'last_name': result.last_name,
                 'email': result.email,
+                #'role': result.role
             }
-        except SQLAlchemyError as e:
-            error = str(e.__dict__['orig'])
+        except SQLAlchemyError as se:
+            error = str(se.__dict__['orig'])
             return {"Error": error}, 500
 
 
