@@ -1,3 +1,7 @@
+"""
+RESTful API Routes: `/cars/{endpoint}`
+"""
+
 from flask_restful import reqparse, abort, Resource, inputs, request
 from flask_jwt_extended import jwt_required
 from master import app, api, db
@@ -33,8 +37,17 @@ parser_available.add_argument('time_range', type=inputs.iso8601interval)
 
 
 class NewCar(Resource):
+    """
+    Add a new car.
+    """
     @jwt_required
     def post(self):
+        """
+        :param str car_number: required.
+
+        - JWT required.
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         args = parser_new.parse_args()
         car_number = args['car_number']
         car_number = car_number.upper()
@@ -102,8 +115,17 @@ class NewCar(Resource):
 
 
 class CarDetail(Resource):
+    """
+    View car detail by `car_number`.
+    """
     @jwt_required
     def get(self, car_number):
+        """
+        :param str car_number: required.
+
+        - JWT required.
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         try:
             inputs.regex('^[A-Za-z0-9]{1,6}$')(car_number)
             print(car_number, flush=True)
@@ -132,8 +154,17 @@ class CarDetail(Resource):
 
 
 class AvailableCars(Resource):
+    """
+    Search for available cars within a date range.
+    """
     @jwt_required
     def get(self):
+        """
+        :param tuple time_range: required, a pair of datetime values in utc.
+
+        - JWT required.
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         args = parser_available.parse_args()
 
         time_range = args['time_range']
@@ -185,9 +216,20 @@ class AvailableCars(Resource):
 
 
 class SearchCars(Resource):
+    """
+    Search cars by different combination of constraints.
+    """
     @jwt_required
     def get(self):
-        # TODO: validation of request args
+        """
+        :param str make: optional
+        :param str body_type: optional
+        :param int seats: optional
+        :param str colour: optional
+
+        - JWT required.
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
 
         try:
             result = cars.CarModel.query.filter_by(**request.args).all()
@@ -219,8 +261,15 @@ class SearchCars(Resource):
 
 
 class AllCars(Resource):
+    """
+    Get a list of all car details including associated booking records.
+    """
     @jwt_required
     def get(self):
+        """
+        - JWT required.
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         try:
             all_cars = cars.CarModel.query.all()
 

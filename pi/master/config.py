@@ -1,5 +1,12 @@
-import os
+"""
+Flask App config profiles for:
 
+- Development
+- Testing
+- Production
+"""
+
+import os
 
 class Config(object):
     DEBUG = False

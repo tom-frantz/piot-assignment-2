@@ -4,35 +4,25 @@ master.models package
 Submodules
 ----------
 
-master.models.bookings module
------------------------------
+master.models.users module
+--------------------------
 
-.. automodule:: master.models.bookings
+.. automodule:: master.models.users
    :members:
-   :undoc-members:
    :show-inheritance:
+
 
 master.models.cars module
 -------------------------
 
 .. automodule:: master.models.cars
    :members:
-   :undoc-members:
-   :show-inheritance:
-
-master.models.users module
---------------------------
-
-.. automodule:: master.models.users
-   :members:
-   :undoc-members:
    :show-inheritance:
 
 
-Module contents
----------------
+master.models.bookings module
+-----------------------------
 
-.. automodule:: master.models
+.. automodule:: master.models.bookings
    :members:
-   :undoc-members:
    :show-inheritance:

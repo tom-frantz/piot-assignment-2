@@ -4,38 +4,6 @@ master.routes package
 Submodules
 ----------
 
-master.routes.users module
---------------------------
-
-.. automodule:: master.routes.users
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-master.routes.auth module
--------------------------
-
-.. automodule:: master.routes.auth
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-master.routes.bookings module
------------------------------
-
-.. automodule:: master.routes.bookings
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-master.routes.cars module
--------------------------
-
-.. automodule:: master.routes.cars
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 master.routes.home module
 -------------------------
 
@@ -45,10 +13,37 @@ master.routes.home module
    :show-inheritance:
 
 
-Module contents
----------------
+master.routes.users module
+--------------------------
 
-.. automodule:: master.routes
+.. automodule:: master.routes.users
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+master.routes.auth module
+-------------------------
+
+.. automodule:: master.routes.auth
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+master.routes.cars module
+-------------------------
+
+.. automodule:: master.routes.cars
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+master.routes.bookings module
+-----------------------------
+
+.. automodule:: master.routes.bookings
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,3 +1,7 @@
+"""
+RESTful API Routes: `/auth/{endpoint}`
+"""
+
 from flask_restful import reqparse, abort, Resource, inputs
 from flask_jwt_extended import (
     create_access_token,
@@ -31,6 +35,9 @@ parser_change_password.add_argument(
 
 
 def check_user(current_user, password):
+    """
+    A help method to verify user password in database.
+    """
     code, result = check_user_exists(current_user) # return status code + password
     if code != 200:
         abort(code, message=result)
@@ -42,7 +49,14 @@ def check_user(current_user, password):
 
 
 class AccessToken(Resource):
+    """
+    User login
+    """
     def post(self):
+        """
+        :param str username: required.
+        :param str password: required.
+        """
         args = parser_get_tokens.parse_args()
         username = args['username']
         password = args['password']
@@ -62,8 +76,15 @@ class AccessToken(Resource):
 
 
 class TokenRefresh(Resource):
+    """
+    Re-generate access token based on refresh token.
+    """
     @jwt_refresh_token_required
     def post(self):
+        """
+        - JWT refresh token required.
+        - Header: `\"Authorization\": \"Bearer {refresh_token}\"`
+        """
         current_user = get_jwt_identity()  # extract identity from refresh token
         username = current_user['username']
         code, res = check_user_exists(username)
@@ -76,8 +97,18 @@ class TokenRefresh(Resource):
 
 
 class ChangePassword(Resource):
+    """
+    Change password.
+    """
     @jwt_required
     def post(self):
+        """
+        :param str old_password: required.
+        :param str new_password: required.
+
+        - JWT required.
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         current_user = get_jwt_identity()
         username = current_user['username']
         args = parser_change_password.parse_args()

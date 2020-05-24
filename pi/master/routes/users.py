@@ -1,3 +1,7 @@
+"""
+RESTful API Routes: `/users/{endpoint}`
+"""
+
 from flask_restful import reqparse, abort, Resource, inputs
 from passlib.hash import pbkdf2_sha256 as sha256
 from flask_jwt_extended import (
@@ -31,6 +35,9 @@ parser.add_argument(
 
 
 def check_duplicate_user(user):
+    """
+    Help method in user registration to check if the username is occupied in database.
+    """
     try:
         result = users.UserModel.query.filter_by(username=user).first()
         if result is not None:
@@ -41,7 +48,17 @@ def check_duplicate_user(user):
 
 
 class Register(Resource):
+    """
+    New user registration.
+    """
     def post(self):
+        """
+        :param str username: required.
+        :param str password: required.
+        :param str first_name: required.
+        :param str last_name: required.
+        :param str email: required.
+        """
         args = parser.parse_args()
         username = args['username']
         password = args['password']
@@ -83,8 +100,15 @@ class Register(Resource):
 
 
 class Profile(Resource):
+    """
+    View current user profile.
+    """
     @jwt_required
     def get(self):
+        """
+        - JWT required.
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         current_user = get_jwt_identity()
         username = current_user['username']
         try:
