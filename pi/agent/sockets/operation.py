@@ -50,14 +50,14 @@ def op_unlock_car(sio, data):
         data["access_token"] = GlobalConf.access_token
         data["refrsh_token"] = GlobalConf.refresh_token
         uri = "unlock_car"
-        print("into op", flush=True)
+        print("into op")
         if GlobalConf.access_token is None:
             print("please login first, system has shut down.")
             sys.exit(0)
         else:
-            print("into emit", flush=True)
+            print("into emit")
             res = sio.emit(
-                uri, data, callback=op_unlock_car_callback,
+                uri, data
             )
         print(data)
     except Exception as err:
@@ -68,7 +68,7 @@ def op_unlock_car(sio, data):
         GlobalConf.recv_queue.put(jdata)
 
 
-def op_unlock_car_callback(number, data):
+def op_unlock_car_callback(data):
     print("op_unlock_car_callback output:", data)
     GlobalConf.recv_queue.put(data)
 
@@ -83,9 +83,8 @@ def op_return_car(sio, data):
             sys.exit(0)
         else:
             res = sio.emit(
-                uri, data, callback=op_return_car_callback,
+                uri, data
             )
-
     except Exception as err:
         traceback.print_exc()
         jdata = {

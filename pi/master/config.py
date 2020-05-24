@@ -33,10 +33,10 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
 
-    DB_PASSWORD = os.environ["My_SQL"]
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:{}@127.0.0.1:3306/CarShare'.format(
-        DB_PASSWORD
-    )
+    # DB_PASSWORD = os.environ["My_SQL"]
+    # SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:{}@127.0.0.1:3306/CarShare'.format(
+    #     DB_PASSWORD
+    # )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True
 

@@ -14,13 +14,13 @@ def unlock_car(data):
         result = cars.CarModel.query.filter_by(car_number=car_number).first()
         result.lock_status = True
         db.session.commit()
-        print("end of db commit", flush=True)
+        print("end of db commit")
         if result is None:
             print('result 401', flush=True)
-            return 401, 'result has no return value'
+            return 401,'result has no return value'
         else:
             print('result 100', flush=True)
-            return 100, 'result has value'
+            return 100,'result has value'
     except Exception as e:
         print('result 500', flush=True)
         error = str(e.__dict__['orig'])
