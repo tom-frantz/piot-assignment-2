@@ -20,7 +20,9 @@ parser = reqparse.RequestParser(bundle_errors=True)
 parser.add_argument(
     'username', type=inputs.regex(r'^[A-Za-z0-9-_]{3,15}$'), required=True
 )
-parser.add_argument('password', type=inputs.regex(r'^[A-Za-z0-9]{8,30}$'), required=True)
+parser.add_argument(
+    'password', type=inputs.regex(r'^[A-Za-z0-9]{8,30}$'), required=True
+)
 parser.add_argument(
     'first_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$'), required=True
 )
@@ -69,10 +71,7 @@ class Register(Resource):
         check_duplicate_user(username)
 
         hashed_password = sha256.hash(password)
-        user_identity = {
-            'username': username,
-            'role': 'user'
-        }
+        user_identity = {'username': username, 'role': 'user'}
         access_token = create_access_token(identity=user_identity)
         refresh_token = create_refresh_token(identity=user_identity)
 

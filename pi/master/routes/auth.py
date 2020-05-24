@@ -115,7 +115,7 @@ class ChangePassword(Resource):
         old_password = args['old_password']
         new_password = args['new_password']
 
-        result = check_user_exists(username) #password string
+        result = check_user_exists(username)  # password string
         stored_password = result.password
         verify_password(old_password, stored_password)
 
@@ -123,10 +123,7 @@ class ChangePassword(Resource):
             # user = users.UserModel.query.filter_by(username=current_user).first()
             result.password = sha256.hash(new_password)
             db.session.commit()
-            identity = {
-                'username': result.username,
-                'role': result.role
-            }
+            identity = {'username': result.username, 'role': result.role}
             access_token = create_access_token(identity=identity)
             refresh_token = create_refresh_token(identity=identity)
             return {'access_token': access_token, "refresh_token": refresh_token}, 201

@@ -73,8 +73,7 @@ class MyBookedCars(Resource):
         current_user = get_jwt_identity()
         username = current_user['username']
         try:
-            result = bookings.BookingModel.query.filter_by(
-                username=username).all()
+            result = bookings.BookingModel.query.filter_by(username=username).all()
             booked_cars = list(
                 map(
                     lambda item: {

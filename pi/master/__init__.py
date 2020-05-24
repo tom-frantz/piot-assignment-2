@@ -39,5 +39,5 @@ import master.sockets
 @app.before_first_request
 def create_tables():
     if app.config['TESTING'] == False:
-        db.drop_all()
+        #db.drop_all()
         db.create_all()
