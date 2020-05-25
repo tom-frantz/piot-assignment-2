@@ -1,25 +1,15 @@
-# Backend
+# Contribution
 
-- `pipenv` is used for virtual environment.
-  To install: `pip3 install pipenv`
-
-- Environment variable settings for development:
-
-  ```
-  export FLASK_APP=master_pi.py
-  export FLASK_ENV=development
-  export My_SQL={your local MySQL password}
-  ```
-
-- Run on local server:
-  Make sure your MySQL server process `mysqld` is running.
-
-  ```
-  cd {project_root_folder}/pi
-  pipenv install
-  pipenv shell
-  flask run
-  ```
-  
-- Default port: `5000`
-
+-  Thomas Frantz
+    - PART A: master pi web app frontend
+    - PART A: master pi socket programming
+    - PART C: sphinx documentation
+- Jacob Morris
+    - PART C: facial recognition
+- Haosen Pang
+    - PART A: master pi socket programming
+    - PART B: agent pi socket programming
+- Shuman Shen
+    - PART A: master pi web app RESTful API
+    - PART C: sphinx documentation
+    - PART D: unit testing

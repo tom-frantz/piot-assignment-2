@@ -2,7 +2,7 @@
 Console screen for AP menu.
 """
 import sys
-import agent.facial_recognition.recogniser
+import agent.facial_recognition.recogniser as recogniser
 import cv2
 import traceback
 from datetime import datetime

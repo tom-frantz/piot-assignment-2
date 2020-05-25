@@ -3,7 +3,7 @@ Import user image for recognition
 """
 import glob
 import os
-import agent.facial_recognition.recogniser
+import agent.facial_recognition.recogniser as recogniser
 import cv2
 
 importing_class = recogniser.Facialrecog()
