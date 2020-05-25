@@ -2,7 +2,6 @@
 Console screen for AP menu.
 """
 import sys
-from master import socketio
 import agent.facial_recognition.recogniser
 import cv2
 import traceback
@@ -13,6 +12,7 @@ class Things:
     """
     Menu functions.
     """
+
     def login(self, send_queue, recv_queue):
         """
         Login for registered users.
@@ -46,25 +46,25 @@ class Things:
             if recv:
                 break
         print("Login token generated:", recv)
-    
-        def facial_recog_login(self, send_queue, recv_queue):
-            recog = recogniser.Facialrecog()
-            username = input("Enter username:")
-            is_same_person = False
-            cap = cv2.VideoCapture(0)
-            if cap is None or not cap.isOpened():
-                imgpath = input("Enter img name:")
-                import_img_path = "pi/agent/facial_recognition/import/" + imgpath
-                img = cv2.imread(import_img_path)
-                is_same_person = recog.recog_image(username, img)
-            else:
-                is_same_person = recog.once_time_recog(username)
-        
-            if not is_same_person:
-                print("Face not recognised")
-                return
-            #login to pi  
-    
+
+    def facial_recog_login(self, send_queue, recv_queue):
+        recog = recogniser.Facialrecog()
+        username = input("Enter username:")
+        is_same_person = False
+        cap = cv2.VideoCapture(0)
+        if cap is None or not cap.isOpened():
+            imgpath = input("Enter img name:")
+            import_img_path = "pi/agent/facial_recognition/import/" + imgpath
+            img = cv2.imread(import_img_path)
+            is_same_person = recog.recog_image(username, img)
+        else:
+            is_same_person = recog.once_time_recog(username)
+
+        if not is_same_person:
+            print("Face not recognised")
+            return
+        # login to pi
+
     def unlock_car(self, send_queue, recv_queue):
         """
         Unlock car if booking is valid.
@@ -119,6 +119,7 @@ class Menu:
     """
     Menu display options.
     """
+
     def __init__(self):
         self.thing = Things()
         self.choices = {
