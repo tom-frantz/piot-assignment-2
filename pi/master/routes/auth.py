@@ -63,8 +63,10 @@ class AccessToken(Resource):
 
         check_user(username, password)
 
-        access_token = create_access_token(identity=username)
-        refresh_token = create_refresh_token(identity=username)
+        user_identity = {'username': username, 'role': 'user'}
+        access_token = create_access_token(identity=user_identity)
+        refresh_token = create_refresh_token(identity=user_identity)
+        
         return (
             {
                 'username': username,
