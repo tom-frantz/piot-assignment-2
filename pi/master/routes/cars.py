@@ -11,6 +11,7 @@ from master.models import cars, bookings
 import master.validation as validate
 import re
 import simplejson as json
+import decimal
 
 # request parser: adding a new car
 parser_new = reqparse.RequestParser(bundle_errors=True)
@@ -35,6 +36,22 @@ parser_available = reqparse.RequestParser()
 # A tuple of depature and return time in iso8601 format
 parser_available.add_argument('time_range', type=inputs.iso8601interval)
 
+# request parser: update car info
+parser_info = reqparse.RequestParser(bundle_errors=True)
+parser_info.add_argument(
+    'car_number', type=inputs.regex('^[A-Za-z0-9]{1,6}$'), required=True
+)
+parser_info.add_argument('make', type=validate.string_30)
+parser_info.add_argument('body_type', type=validate.string_30)
+parser_info.add_argument('colour', type=validate.string_30)
+parser_info.add_argument('seats', type=inputs.int_range(1, 12))
+parser_info.add_argument('cost_per_hour', type=validate.price)
+parser_info.add_argument('latitude', type=validate.latitude_decimal)
+parser_info.add_argument('longitude', type=validate.longitude_decimal)
+# !!ATTENTION!!
+# Req body must input string 'true' or 'false' (case sensitive) as boolean value
+parser_info.add_argument('lock_status', type=inputs.boolean)
+
 
 class NewCar(Resource):
     """
@@ -57,11 +74,6 @@ class NewCar(Resource):
         colour = args['colour']
         seats = args['seats']
         cost_per_hour = args['cost_per_hour']
-
-        print("seats", flush=True)
-        print(type(seats), flush=True)
-        print("cost per hour")
-        print(type(cost_per_hour), flush=True)
 
         # optional request arguments by default
         latitude = -37.804663448
@@ -311,9 +323,51 @@ class AllCars(Resource):
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
+class UpdateCar(Resource):
+    def put(self):
+        args = parser_info.parse_args()
+        car_number = args['car_number']
+
+        try:
+            result = cars.CarModel.query.filter_by(car_number=car_number).first()
+
+            if args['make']:
+                result.make = args['make']
+            if args['body_type']:
+                result.body_type = args['body_type']
+            if args['seats']:
+                result.seats = args['seats']
+            if args['colour']:
+                result.colour = args['colour']
+            if args['latitude']:
+                result.latitude = args['latitude']
+            if args['longitude']:
+                result.longitude = args['longitude']
+            if args['cost_per_hour']: 
+                result.cost_per_hour = args['cost_per_hour']
+            if args['lock_status'] is not None:
+                result.lock_status = args['lock_status']
+            
+            db.session.commit()
+
+            return {
+                "car_number": result.car_number,
+                "make": result.make,
+                "body_type": result.body_type,
+                "seats": result.seats,
+                "colour": result.colour,
+                "latitude": json.dumps(result.latitude, use_decimal=True),
+                "longitude": json.dumps(result.longitude, use_decimal=True),
+                "cost_per_hour": json.dumps(result.cost_per_hour, use_decimal=True),
+                "lock_status": result.lock_status
+            }, 200
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return {'message': error}, 500
 
 api.add_resource(NewCar, '/cars/new')
 api.add_resource(CarDetail, '/cars/detail/<string:car_number>')
 api.add_resource(AvailableCars, '/cars/available')
 api.add_resource(SearchCars, '/cars/search')
 api.add_resource(AllCars, '/cars/all')
+api.add_resource(UpdateCar, '/cars/update')

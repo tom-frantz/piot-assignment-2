@@ -40,13 +40,13 @@ def check_user(current_user, password):
     """
     code, result = check_user_exists(current_user) # return status code + password
     if code != 200:
-        abort(code, message=result)
-    stored_password = result
+        abort(code, message=result["message"])
+    stored_password = result["password"]
     ok, msg = verify_password(password, stored_password)
     if not ok:
         abort(401, message=msg)
-    return True
-
+    return result["role"]
+    
 
 class AccessToken(Resource):
     """
@@ -61,9 +61,9 @@ class AccessToken(Resource):
         username = args['username']
         password = args['password']
 
-        check_user(username, password)
+        role = check_user(username, password)
 
-        user_identity = {'username': username, 'role': 'user'}
+        user_identity = {'username': username, 'role': role}
         access_token = create_access_token(identity=user_identity)
         refresh_token = create_refresh_token(identity=user_identity)
         
@@ -136,4 +136,3 @@ class ChangePassword(Resource):
 
 api.add_resource(AccessToken, '/auth/new')
 api.add_resource(TokenRefresh, '/auth/refresh')
-api.add_resource(ChangePassword, '/auth/password')

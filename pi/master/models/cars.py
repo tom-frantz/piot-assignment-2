@@ -26,12 +26,13 @@ class CarModel(db.Model):
     # default: -37.804663448,144.957996168
     latitude = db.Column(db.Numeric(11, 9), default=-37.804663448, nullable=False)
     longitude = db.Column(db.Numeric(12, 9), default=144.957996168, nullable=False)
-    cost_per_hour = db.Column(db.Numeric, nullable=False)
+    cost_per_hour = db.Column(db.Numeric(6,2), nullable=False)
 
     # default: locked = True, unlock = False
     lock_status = db.Column(db.Boolean, nullable=False, default=True)
     bookings = db.relationship('BookingModel', backref='Cars', lazy=True)
-
+    reported_issues = db.relationship('IssueModel', backref='Cars', lazy=True)
+    
     def save_to_db(self):
         """
         Save session to database.
