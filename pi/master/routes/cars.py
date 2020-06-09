@@ -40,6 +40,7 @@ class NewCar(Resource):
     """
     Add a new car.
     """
+
     @jwt_required
     def post(self):
         """
@@ -118,6 +119,7 @@ class CarDetail(Resource):
     """
     View car detail by `car_number`.
     """
+
     @jwt_required
     def get(self, car_number):
         """
@@ -156,6 +158,7 @@ class AvailableCars(Resource):
     """
     Search for available cars within a date range.
     """
+
     @jwt_required
     def get(self):
         """
@@ -218,6 +221,7 @@ class SearchCars(Resource):
     """
     Search cars by different combination of constraints.
     """
+
     @jwt_required
     def get(self):
         """
@@ -263,6 +267,7 @@ class AllCars(Resource):
     """
     Get a list of all car details including associated booking records.
     """
+
     @jwt_required
     def get(self):
         """

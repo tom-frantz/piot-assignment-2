@@ -53,6 +53,7 @@ class Register(Resource):
     """
     New user registration.
     """
+
     def post(self):
         """
         :param str username: required.
@@ -102,6 +103,7 @@ class Profile(Resource):
     """
     View current user profile.
     """
+
     @jwt_required
     def get(self):
         """
