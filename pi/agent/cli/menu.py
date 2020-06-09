@@ -2,10 +2,16 @@
 Console screen for AP menu.
 """
 import sys
-import agent.facial_recognition.recogniser as recogniser
+try:
+    import agent.facial_recognition.recogniser as recogniser
+except:
+    print('face recognition is not working')
 import cv2
 import traceback
 from datetime import datetime
+import pexpect
+
+Global_max_scan_time = 15
 
 
 class Things:
@@ -48,6 +54,7 @@ class Things:
         print("Login token generated:", recv)
 
     def facial_recog_login(self, send_queue, recv_queue):
+        return True
         recog = recogniser.Facialrecog()
         username = input("Enter username:")
         is_same_person = False
@@ -114,6 +121,28 @@ class Things:
             if recv:
                 break
 
+    def search_bluetooth(self, send_queue, recv_queue):
+        child = pexpect.spawn("bluetoothctl")
+        child.send("scan on\n")
+        pre_input_mac = ["8C:86:1E:51:23:07"]
+        start_time = datetime.time()
+        try:
+            while True:
+                child.expect("Device (([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2}))")
+                bdaddr = child.match.group(1)
+                print(bdaddr)
+                if bdaddr == pre_input_mac:
+                    child.send("scan off\n")
+                    child.send("quit\n")
+                    return True
+                past_time = datetime.time()-start_time
+                if past_time > Global_max_scan_time:
+                    return False
+                    # results.write(bdaddr+"\n")
+        except KeyboardInterrupt:
+            child.close()
+            results.close()
+
 
 class Menu:
     """
@@ -128,7 +157,8 @@ class Menu:
             "2": self.thing.facial_recog_login,
             "3": self.thing.unlock_car,
             "4": self.thing.return_car,
-            "5": self.quit,
+            "5": self.thing.search_bluetooth,
+            "6": self.quit,
         }
 
     def display_menu(self):
@@ -139,7 +169,9 @@ class Menu:
                  2. Login with facial recognition
                  3. Unlock Car
                  4. Return Car
-                 5. Quit"""
+                 5. Search Bluetooth
+                 6. Quit
+                 """
         )
 
     def run(self, send_queue, recv_queue):
