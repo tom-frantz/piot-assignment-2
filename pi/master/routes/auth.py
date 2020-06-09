@@ -38,7 +38,7 @@ def check_user(current_user, password):
     """
     A help method to verify user password in database.
     """
-    code, result = check_user_exists(current_user) # return status code + password
+    code, result = check_user_exists(current_user)  # return status code + password
     if code != 200:
         abort(code, message=result["message"])
     stored_password = result["password"]
@@ -52,6 +52,7 @@ class AccessToken(Resource):
     """
     User login
     """
+
     def post(self):
         """
         :param str username: required.
@@ -66,7 +67,7 @@ class AccessToken(Resource):
         user_identity = {'username': username, 'role': role}
         access_token = create_access_token(identity=user_identity)
         refresh_token = create_refresh_token(identity=user_identity)
-        
+
         return (
             {
                 'username': username,
@@ -81,6 +82,7 @@ class TokenRefresh(Resource):
     """
     Re-generate access token based on refresh token.
     """
+
     @jwt_refresh_token_required
     def post(self):
         """
@@ -102,6 +104,7 @@ class ChangePassword(Resource):
     """
     Change password.
     """
+
     @jwt_required
     def post(self):
         """

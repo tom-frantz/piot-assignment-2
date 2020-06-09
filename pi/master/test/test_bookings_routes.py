@@ -54,6 +54,7 @@ def test_my_booked_cars(client):
         assert len(result) != 0
         assert res.status_code == 200
 
+
 def test_add_booking_valid(client):
     # booking_period format: 2013-01-01/2013-01-01
     identity = {'username': 'user01'}
@@ -71,6 +72,7 @@ def test_add_booking_valid(client):
         assert result['message'].startswith("Your booking")
         assert res.status_code == 200
 
+
 def test_add_booking_invalid(client):
     # booking_period format: 2013-01-01/2013-01-01
     identity = {'username': 'user01'}
@@ -87,6 +89,7 @@ def test_add_booking_invalid(client):
         result = utils.convert_byte_to_dict(res.data)
         assert result['message'].startswith("Car")
         assert res.status_code == 403
+
 
 def test_cancel_booking(client):
     identity = {'username': 'user01'}

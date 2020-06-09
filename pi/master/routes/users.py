@@ -70,6 +70,7 @@ class Register(Resource):
     """
     New user registration. No admin or engineer account allowed.
     """
+
     def post(self):
         """
         :param str username: required.
@@ -119,6 +120,7 @@ class Profile(Resource):
     """
     View current user profile.
     """
+
     @jwt_required
     def get(self):
         """

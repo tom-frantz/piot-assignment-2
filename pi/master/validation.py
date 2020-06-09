@@ -28,17 +28,20 @@ def longitude_decimal(value):
 
     return value
 
+
 def string_30(value):
     value = str(value)
     if len(value) > 30:
         raise ValueError("String length should be less than or equal to 30.")
     return value
 
+
 def string_1000(value):
     value = str(value)
     if len(value > 1000):
         raise ValueError("Maximum length allowed: 1000 characters.")
     return value
+
 
 def price(value, name):
     try:
@@ -50,6 +53,7 @@ def price(value, name):
         raise ValueError("Cost value should not be negative.")
 
     return value
+
 
 def role(value):
     value = value.strip().lower()
