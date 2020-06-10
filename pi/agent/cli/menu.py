@@ -2,13 +2,9 @@
 Console screen for AP menu.
 """
 import sys
-try:
-    import agent.facial_recognition.recogniser as recogniser
-except:
-    print('face recognition is not working')
-import cv2
-import traceback
-from datetime import datetime
+#import agent.facial_recognition.recogniser as recogniser
+#import cv2
+import time
 import pexpect
 
 Global_max_scan_time = 15
@@ -20,13 +16,6 @@ class Things:
     """
 
     def login(self, send_queue, recv_queue):
-        """
-        Login for registered users.
-
-        :param str username: required.
-        :param str password: required.
-        :param str car_number: required.
-        """
         username = input("Please iuput your username:")
         print(username)
         password = input("Please input your password:")
@@ -124,24 +113,33 @@ class Things:
     def search_bluetooth(self, send_queue, recv_queue):
         child = pexpect.spawn("bluetoothctl")
         child.send("scan on\n")
-        pre_input_mac = ["8C:86:1E:51:23:07"]
-        start_time = datetime.time()
+        pre_input_mac = "F0:18:98:00:F5:79"
+        start_time = time.time()
         try:
             while True:
                 child.expect("Device (([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2}))")
                 bdaddr = child.match.group(1)
-                print(bdaddr)
-                if bdaddr == pre_input_mac:
+                daddr_str = bytes.decode(bdaddr)
+                if daddr_str == pre_input_mac:
                     child.send("scan off\n")
                     child.send("quit\n")
+                    print('has found engineer devices, will process to login')
+                    data = {
+                        "engineer_mac": daddr_str
+                    }
+                    send_queue.put(data)
                     return True
-                past_time = datetime.time()-start_time
+                past_time = time.time()-start_time
                 if past_time > Global_max_scan_time:
                     return False
                     # results.write(bdaddr+"\n")
         except KeyboardInterrupt:
             child.close()
             results.close()
+        while 1:
+            recv = recv_queue.get()
+            if recv:
+                break
 
 
 class Menu:

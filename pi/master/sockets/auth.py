@@ -31,6 +31,26 @@ def login(data):
     )
 
 
+@socketio.on("bluetooth_login")
+def bluetooth_login(data):
+    engineer_mac_addr = data["engineer_mac"]
+    pre_input_mac = "F0:18:98:00:F5:79"
+    if engineer_mac_addr == pre_input_mac:
+        ok = True
+    if not ok:
+        return error_response("engineer login fail")
+
+    identity = {
+        "username": "engineer",
+        "role": "engineer"
+    }
+    access_token = create_access_token(identity=identity)
+    refresh_token = create_refresh_token(identity=identity)
+    return success_response(
+        username="engineer", access_token=access_token, refresh_token=refresh_token,
+    )
+
+
 @socketio.on("refresh")
 def refresh(data):
     try:

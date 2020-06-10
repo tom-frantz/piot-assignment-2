@@ -3,9 +3,7 @@ Queue message and callback operations.
 """
 
 import socketio
-import time
 import traceback
-import urllib
 import sys
 
 # sio = socketio.Client(engineio_logger=Fasle)
@@ -95,11 +93,7 @@ def refresh(socket):
 
 
 def op_login(sio, data):
-    """
-    Return data formate:
-    
-    `cmd,data = "login", {"username": "user", "password": "password"}`
-    """
+
     try:
         res = sio.emit(
             "login", data, callback=op_login_callback,
@@ -115,6 +109,23 @@ def op_login_callback(data):
     #{'success': True, 'username': '1', 'access_token': 'access_token', 'refresh_token': 'refresh_token'}
     GlobalConf.access_token = data.get("access_token")
     GlobalConf.refresh_token = data.get("refresh_token")
+    GlobalConf.recv_queue.put(data)
+
+
+def op_bluetooth_seaarch(data):
+    try:
+        res = sio.emit(
+            "bluetooth_login", data, callback=op_bluetooth_seaarch_callback,
+        )
+    except Exception as err:
+        jdata = {
+            "error": str(err)
+            }
+        GlobalConf.recv_queue.put(jdata)
+
+
+def op_bluetooth_seaarch_callback(data):
+    print("op_bluetooth_seaarch_callback in processing.")
     GlobalConf.recv_queue.put(data)
 
 

@@ -27,6 +27,7 @@ def verify_password(password, hashed_password):
     except ValueError:
         return False, 'The password in database is not in the right format.'
 
+
 def checkAdmin(role):
     """
     A help method to verify if the user is an admin.
@@ -35,6 +36,7 @@ def checkAdmin(role):
         pass
     else: 
         abort(403, message="Not authorised admin.")
+
 
 def checkEngineer(role):
     """
@@ -45,3 +47,7 @@ def checkEngineer(role):
         pass
     else: 
         abort(403, message="Not authorised admin or engineer.")
+
+
+def check_engineer_mac_exists(addr):
+    pass
