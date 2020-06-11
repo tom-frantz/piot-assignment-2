@@ -27,21 +27,23 @@ def verify_password(password, hashed_password):
     except ValueError:
         return False, 'The password in database is not in the right format.'
 
+
 def checkAdmin(role):
     """
     A help method to verify if the user is an admin.
     """
     if role.lower() == "admin":
         pass
-    else: 
+    else:
         abort(403, message="Not authorised admin.")
+
 
 def checkStaff(role):
     """
     A help method to verify if the user is an engineer or admin.
     """
-    
+
     if role.lower() == "admin" or role.lower == "manager" or role.lower == "engineer":
         pass
-    else: 
+    else:
         abort(403, message="Not authorised staff account.")

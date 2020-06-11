@@ -8,6 +8,7 @@ Flask App config profiles for:
 
 import os
 
+
 class Config(object):
     DEBUG = False
     TESTING = False
@@ -39,7 +40,7 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    
+
     DB_PASSWORD = os.environ["My_SQL"]
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:{}@127.0.0.1:3306/CarShare'.format(
         DB_PASSWORD
