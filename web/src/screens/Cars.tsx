@@ -27,7 +27,10 @@ const Cars: React.FC<CarsProps> = (props: CarsProps) => {
     const deleteCar = (record: Car) => {
         axios
             .delete(`http://${api}:5000/cars/delete/${record.car_number}`)
-            .then(() => message.success("Car was successfully deleted"))
+            .then(() => {
+                message.success("Car was successfully deleted");
+                updateCars();
+            })
             .catch((e) => {
                 console.error(e);
             });

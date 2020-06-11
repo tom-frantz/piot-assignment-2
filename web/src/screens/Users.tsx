@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import api from "../utils/api";
 import { Booking, Car, formatBookings, getColumnSearchProps } from "../utils/tableUtils";
-import { Space, Table, Button } from "antd";
+import { Space, Table, Button, message } from "antd";
 import UpdateUserModal from "../containers/UpdateUserModal";
 
 interface UsersProps {}
@@ -48,6 +48,18 @@ const Users: React.FC<UsersProps> = (props: UsersProps) => {
             .catch();
     };
 
+    const deleteUser = (record: User) => {
+        axios
+            .delete(`http://${api}:5000/users/delete/${record.username}`)
+            .then(() => {
+                message.success("User was successfully deleted");
+                updateUsers();
+            })
+            .catch((e) => {
+                console.error(e);
+            });
+    };
+
     useEffect(() => updateUsers(), []);
 
     return (
@@ -72,7 +84,7 @@ const Users: React.FC<UsersProps> = (props: UsersProps) => {
                     password,
                 }: Exclude<User, "bookings"> & { password: string }) => {
                     axios
-                        .post(`http://${api}:5000/users/register`, {
+                        .post(`http://${api}:5000/users/admin-register`, {
                             username,
                             first_name,
                             last_name,
@@ -144,7 +156,13 @@ const Users: React.FC<UsersProps> = (props: UsersProps) => {
                                         </a>
                                     </div>
                                     <div style={{ display: "flex", flexDirection: "column" }}>
-                                        <a onClick={() => {}}>Delete</a>
+                                        <a
+                                            onClick={() => {
+                                                deleteUser(record);
+                                            }}
+                                        >
+                                            Delete
+                                        </a>
                                     </div>
                                 </Space>
                             );
