@@ -1,24 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { Car, formatCars, UnformattedCar } from "../utils/tableUtils";
+import { Car, formatCars, Issue, UnformattedCar } from "../utils/tableUtils";
 import axios from "axios";
 import { GoogleApiWrapper, InfoWindow, Map, Marker } from "google-maps-react";
 import api from "../utils/api";
+import { Auth } from "../App";
 
 interface IssuesProps {
     google: any;
+    auth: Auth;
 }
 
 const Issues: React.FC<IssuesProps> = (props: IssuesProps) => {
+    const { auth } = props;
     const [cars, setCars] = useState<Car[]>([]);
 
     const [activeMarker, setActiveMarker] = useState(undefined);
     const [activeCar, setActiveCar] = useState<Car | undefined>(undefined);
 
     useEffect(() => {
-        axios.get(`http://${api}/cars/all`).then((value: { data: UnformattedCar[] }) => {
-            setCars(value.data.map(formatCars));
-        });
-    }, []);
+        if (auth)
+            axios.get(`http://${api}:5000/issues/all`).then((value: { data: UnformattedCar[] }) => {
+                console.log("Issues", value);
+                setCars(value.data.map(formatCars));
+            });
+    }, [auth]);
 
     return (
         <Map
@@ -31,6 +36,13 @@ const Issues: React.FC<IssuesProps> = (props: IssuesProps) => {
             }}
         >
             {cars.map((car: Car) => {
+                console.log(
+                    car.issues.reduce(
+                        (previousValue, currentValue) =>
+                            previousValue + " & " + currentValue.description,
+                        ""
+                    )
+                );
                 return (
                     <Marker
                         // @ts-ignore
@@ -51,7 +63,12 @@ const Issues: React.FC<IssuesProps> = (props: IssuesProps) => {
                     setActiveMarker(undefined);
                 }}
             >
-                <div>{activeCar && <h4>{activeCar.car_number}</h4>}</div>
+                <div>
+                    {activeCar && <h4>{activeCar.car_number}</h4>}
+                    {activeCar?.issues.map((currentValue) => (
+                        <p>{" - " + currentValue.description}</p>
+                    ))}
+                </div>
             </InfoWindow>
         </Map>
     );

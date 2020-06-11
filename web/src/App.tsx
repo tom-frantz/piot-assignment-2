@@ -169,7 +169,7 @@ function AppNavigator() {
                             path={"/issues"}
                             exact
                         >
-                            <Issues />
+                            <Issues auth={auth} />
                         </PrivateRoute>
 
                         <PrivateRoute

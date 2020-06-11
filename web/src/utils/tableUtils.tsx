@@ -13,6 +13,7 @@ export interface Car {
     cost_per_hour: number;
     lock_status: boolean;
     bookings: Booking[];
+    issues: Issue[];
 }
 
 export interface Booking {
@@ -79,6 +80,12 @@ const handleReset = (clearFilters: () => void) => {
     clearFilters();
 };
 
+export interface UnformattedIssues {
+    description: string;
+    issue_id: number;
+    status: boolean;
+}
+
 export interface UnformattedCar {
     car_number: string;
     make: string;
@@ -89,7 +96,8 @@ export interface UnformattedCar {
     longitude: string;
     cost_per_hour: string;
     lock_status: boolean;
-    bookings: UnformattedBooking[];
+    bookings?: UnformattedBooking[];
+    issues?: UnformattedIssues[];
 }
 
 export interface UnformattedBooking {
@@ -117,6 +125,18 @@ export const formatBookings = ({
     car_number,
 });
 
+export interface Issue {
+    description: string;
+    issue_id: number;
+    status: boolean;
+}
+
+export const formatIssues = ({ description, issue_id, status }: UnformattedIssues): Issue => ({
+    description,
+    issue_id,
+    status,
+});
+
 export const formatCars = ({
     car_number,
     make,
@@ -128,6 +148,7 @@ export const formatCars = ({
     lock_status,
     longitude,
     seats,
+    issues,
 }: UnformattedCar): Car => {
     return {
         car_number,
@@ -139,6 +160,7 @@ export const formatCars = ({
         longitude: parseFloat(longitude),
         cost_per_hour: parseFloat(cost_per_hour),
         lock_status,
-        bookings: bookings.map(formatBookings),
+        issues: (issues || []).map(formatIssues),
+        bookings: (bookings || []).map(formatBookings),
     };
 };
