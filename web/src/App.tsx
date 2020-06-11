@@ -105,6 +105,10 @@ function AppNavigator() {
                         access_token: values.data.access_token as string,
                         timeout: getAuthTimer(),
                     });
+                })
+                .catch((e) => {
+                    console.error(e);
+                    localStorage.removeItem("refresh_token");
                 });
         }
     }, []);

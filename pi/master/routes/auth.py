@@ -137,5 +137,5 @@ class ChangePassword(Resource):
             return {"Error": error}, 500
 
 
-api.add_resource(AccessToken, '/access_token/new')
-api.add_resource(TokenRefresh, '/access_token/refresh')
+api.add_resource(AccessToken, '/auth/new')
+api.add_resource(TokenRefresh, '/auth/refresh')
