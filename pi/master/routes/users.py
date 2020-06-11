@@ -13,7 +13,7 @@ from flask_jwt_extended import (
 from master import app, api, db
 from sqlalchemy.exc import SQLAlchemyError
 from master.models import users, bookings
-from master.auth import checkAdmin, checkEngineer
+from master.auth import checkAdmin
 import master.validation as validate
 
 # req parser: add a new user
@@ -41,13 +41,40 @@ parser_info = reqparse.RequestParser(bundle_errors=True)
 parser_info.add_argument(
     'username', type=inputs.regex(r'^[A-Za-z0-9-_]{3,15}$'), required=True
 )
-parser_info.add_argument('first_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$'))
-parser_info.add_argument('last_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$'))
+parser_info.add_argument(
+    'first_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$')
+)
+parser_info.add_argument(
+    'last_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$')
+)
 parser_info.add_argument(
     'email',
-    type=inputs.regex(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$'),
+    type=inputs.regex(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$')
 )
 parser_info.add_argument('role', type=validate.role)
+
+# parser for admin registration
+# req parser: add a new user
+parser_admin = reqparse.RequestParser(bundle_errors=True)
+parser_admin.add_argument(
+    'username', type=inputs.regex(r'^[A-Za-z0-9-_]{3,15}$'), required=True
+)
+parser_admin.add_argument(
+    'password', type=inputs.regex(r'^[A-Za-z0-9]{8,30}$'), required=True
+)
+parser_admin.add_argument(
+    'first_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$'), required=True
+)
+parser_admin.add_argument(
+    'last_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$'), required=True
+)
+parser_admin.add_argument(
+    'email',
+    type=inputs.regex(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$'),
+    required=True,
+)
+parser_admin.add_argument(
+    'role', type=validate.role, required=True)
 
 
 def check_duplicate_user(user):
@@ -59,7 +86,7 @@ def check_duplicate_user(user):
         if result is not None:
             abort(403, message="Username has already been taken.")
     except SQLAlchemyError as e:
-        # error = str(e.__dict__['orig'])
+        #error = str(e.__dict__['orig'])
         return {'message': str(e)}, 500
 
 
@@ -67,7 +94,6 @@ class Register(Resource):
     """
     New user registration. No admin or engineer account allowed.
     """
-
     def post(self):
         """
         :param str username: required.
@@ -112,12 +138,66 @@ class Register(Resource):
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
+class AdminRegister(Resource):
+    """
+    New user registration for admin manager and engineer accounts.
+    """
+    @jwt_required
+    def post(self):
+        """
+        :param str username: required.
+        :param str password: required.
+        :param str first_name: required.
+        :param str last_name: required.
+        :param str email: required.
+        :param str role: required as *admin*, *manager* or *engineer*.
+        """
+        current_user = get_jwt_identity()
+        current_role = current_user['role']
+        checkAdmin(current_role)
+
+        args = parser_admin.parse_args()
+        username = args['username']
+        password = args['password']
+        first_name = args['first_name']
+        last_name = args['last_name']
+        email = args['email']
+        role = args['role']
+
+        check_duplicate_user(username)
+
+        hashed_password = sha256.hash(password)
+        user_identity = {'username': username, 'role': role}
+        access_token = create_access_token(identity=user_identity)
+        refresh_token = create_refresh_token(identity=user_identity)
+
+        # database new record
+        new_user = users.UserModel(
+            username=username,
+            password=hashed_password,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            role=role
+        )
+        try:
+            new_user.add_new_record()
+            return (
+                {
+                    'username': username,
+                    'access_token': access_token,
+                    'refresh_token': refresh_token,
+                },
+                201,
+            )
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return {'message': error}, 500
 
 class Profile(Resource):
     """
     View current user profile.
     """
-
     @jwt_required
     def get(self):
         """
@@ -141,12 +221,10 @@ class Profile(Resource):
             error = str(se.__dict__['orig'])
             return {"Error": error}, 500
 
-
 class AllUsers(Resource):
     """
     Get all users with corresponding bookings.
     """
-
     @jwt_required
     def get(self):
         """
@@ -171,10 +249,10 @@ class AllUsers(Resource):
                     "last_name": i.last_name,
                     "email": i.email,
                     "role": i.role,
-                    "bookings": [],
+                    "bookings": []
                 }
                 all_bookings = bookings.BookingModel.query.filter_by(
-                    username=i.username
+                    username = i.username
                 ).all()
                 if len(all_bookings) > 0:
                     booking_list = list(
@@ -197,12 +275,10 @@ class AllUsers(Resource):
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
-
 class ChangeUserDetail(Resource):
     """
     Change user details: first name, last name, and email.
     """
-
     @jwt_required
     def put(self):
         """
@@ -216,7 +292,7 @@ class ChangeUserDetail(Resource):
         current_user = get_jwt_identity()
         role = current_user['role']
         checkAdmin(role)
-
+        
         try:
             args = parser_info.parse_args()
             username = args['username']
@@ -224,34 +300,58 @@ class ChangeUserDetail(Resource):
 
             if args["first_name"]:
                 result.first_name = args["first_name"]
-
+        
             if args["last_name"]:
                 result.last_name = args["last_name"]
-
+        
             if args["email"]:
                 result.email = args["email"]
 
-            if args["role"]:
+            if args["role"]: 
                 result.role = args["role"]
 
             db.session.commit()
 
+            return {
+                'username': result.username,
+                'first_name': result.first_name,
+                'last_name': result.last_name,
+                'email': result.email,
+                'role': result.role    
+                }, 200
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return {'message': error}, 500
+
+class DeleteUser(Resource):
+    @jwt_required
+    def delete(self, username):
+        """
+        :param str username: required as url paramemter
+
+        - JWT required.
+        - **Admin only**
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
+        current_user = get_jwt_identity()
+        role = current_user['role']
+        checkAdmin(role)
+
+        try:
+            result = users.UserModel.query.filter_by(username=username).delete()
+
+            db.session.commit()
             return (
-                {
-                    'username': result.username,
-                    'first_name': result.first_name,
-                    'last_name': result.last_name,
-                    'email': result.email,
-                    'role': result.role,
-                },
+                {'message': "User {} has been deleted.".format(username)},
                 200,
             )
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
-
 api.add_resource(Register, '/users/register')
+api.add_resource(AdminRegister, '/users/admin-register')
 api.add_resource(Profile, '/users/me')
 api.add_resource(AllUsers, '/users/all')
 api.add_resource(ChangeUserDetail, '/users/update')
+api.add_resource(DeleteUser, '/users/delete/<string:username>')
