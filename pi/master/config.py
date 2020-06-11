@@ -18,6 +18,13 @@ class Config(object):
     )
 
     JWT_SECRET_KEY = 'jwt-secret-string'
+    MAIL_SERVER = 'smtp.sendgrid.net'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = 'apikey'
+    MAIL_PASSWORD = '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'
+    MAIL_DEFAULT_SENDER = 'aiculus2019@gmail.com'
+
     # app.config['JWT_BLACKLIST_ENABLED'] = True
     # app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 

@@ -20,6 +20,7 @@ class UserModel(db.Model):
     last_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(20), nullable=False, default="user")
+    mac_address = db.Column(db.String(17), nullable=True)
     bookings = db.relationship('BookingModel', backref='Users', lazy=True)
 
     def add_new_record(self):

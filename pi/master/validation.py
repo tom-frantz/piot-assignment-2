@@ -35,8 +35,7 @@ def string_30(value):
     return value
 
 def string_1000(value):
-    value = str(value)
-    if len(value > 1000):
+    if len(value) > 1000:
         raise ValueError("Maximum length allowed: 1000 characters.")
     return value
 
@@ -53,6 +52,6 @@ def price(value, name):
 
 def role(value):
     value = value.strip().lower()
-    if value != "user" and value != "admin" and value != "engineer":
+    if value != "user" and value != "admin" and value != "manager" and value != "engineer":
         raise ValueError("A valid role should be user, admin or engineer.")
     return value.strip().lower()

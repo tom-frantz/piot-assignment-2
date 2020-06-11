@@ -7,8 +7,9 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity,
 )
-from master import app, api, db
+from master import app, api, db, mail
 from sqlalchemy.exc import SQLAlchemyError
+from flask_mail import Message
 from master.models import issues, cars
 from master.auth import checkAdmin, checkStaff
 import master.validation as validate
@@ -20,7 +21,7 @@ parser_new.add_argument('description', type=inputs.regex(r'^[A-Za-z0-9-_ ]{1,100
 
 parser_update = reqparse.RequestParser(bundle_errors=True)
 parser_update.add_argument('issue_id', type=inputs.positive, required=True)
-parser_update.add_argument('description', type=inputs.regex(r'^[A-Za-z0-9-_ ]{1,1000}$'))
+parser_update.add_argument('description', type=validate.string_1000, required=True)
 # True: "true", False: "false"
 parser_update.add_argument('status', type=inputs.boolean)
 
@@ -40,6 +41,12 @@ class NewIssue(Resource):
                 description = description
             )
             new_issue.save_to_db()
+
+            # send a mail
+            body = "Issue: {} | Car {} | Description: {}.".format(new_issue.issue_id, car_number, description)
+            msg = Message(body, recipients=['aiculus2019@gmail.com','vonaka2183@lercjy.com'])
+            mail.send(msg)
+
             return {
                 'message': 'Issue ID {} for Car {} submitted.'.format(new_issue.issue_id, new_issue.car_number)
             }, 201
