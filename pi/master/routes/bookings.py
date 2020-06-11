@@ -64,6 +64,7 @@ class MyBookedCars(Resource):
     """
     List of all the booked cars of the current user.
     """
+
     @jwt_required
     def get(self):
         """
@@ -96,6 +97,7 @@ class NewBooking(Resource):
     """
     Add a new booking.
     """
+
     @jwt_required
     def post(self):
         """
@@ -141,6 +143,7 @@ class CancelBooking(Resource):
     """
     Cancel a booking by Booking ID
     """
+
     @jwt_required
     def delete(self, booking_id):
         """

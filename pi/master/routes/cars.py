@@ -57,6 +57,7 @@ class NewCar(Resource):
     """
     Add a new car.
     """
+
     @jwt_required
     def post(self):
         """
@@ -130,6 +131,7 @@ class CarDetail(Resource):
     """
     View car detail by `car_number`.
     """
+
     @jwt_required
     def get(self, car_number):
         """
@@ -168,6 +170,7 @@ class AvailableCars(Resource):
     """
     Search for available cars within a date range.
     """
+
     @jwt_required
     def get(self):
         """
@@ -230,6 +233,7 @@ class SearchCars(Resource):
     """
     Search cars by different combination of constraints.
     """
+
     @jwt_required
     def get(self):
         """
@@ -275,6 +279,7 @@ class AllCars(Resource):
     """
     Get a list of all car details including associated booking records.
     """
+
     @jwt_required
     def get(self):
         """
@@ -323,6 +328,7 @@ class AllCars(Resource):
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
+
 class UpdateCar(Resource):
     def put(self):
         args = parser_info.parse_args()
@@ -343,27 +349,31 @@ class UpdateCar(Resource):
                 result.latitude = args['latitude']
             if args['longitude']:
                 result.longitude = args['longitude']
-            if args['cost_per_hour']: 
+            if args['cost_per_hour']:
                 result.cost_per_hour = args['cost_per_hour']
             if args['lock_status'] is not None:
                 result.lock_status = args['lock_status']
-            
+
             db.session.commit()
 
-            return {
-                "car_number": result.car_number,
-                "make": result.make,
-                "body_type": result.body_type,
-                "seats": result.seats,
-                "colour": result.colour,
-                "latitude": json.dumps(result.latitude, use_decimal=True),
-                "longitude": json.dumps(result.longitude, use_decimal=True),
-                "cost_per_hour": json.dumps(result.cost_per_hour, use_decimal=True),
-                "lock_status": result.lock_status
-            }, 200
+            return (
+                {
+                    "car_number": result.car_number,
+                    "make": result.make,
+                    "body_type": result.body_type,
+                    "seats": result.seats,
+                    "colour": result.colour,
+                    "latitude": json.dumps(result.latitude, use_decimal=True),
+                    "longitude": json.dumps(result.longitude, use_decimal=True),
+                    "cost_per_hour": json.dumps(result.cost_per_hour, use_decimal=True),
+                    "lock_status": result.lock_status,
+                },
+                200,
+            )
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
+
 
 api.add_resource(NewCar, '/cars/new')
 api.add_resource(CarDetail, '/cars/detail/<string:car_number>')

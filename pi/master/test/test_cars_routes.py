@@ -65,6 +65,7 @@ def test_add_new_car(client):
         # print("*****************")
         assert result['message'] != None
 
+
 def test_get_car_detail(client):
     identity = {'username': 'user01'}
     token = ""

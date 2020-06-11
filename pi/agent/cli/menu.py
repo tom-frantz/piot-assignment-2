@@ -33,8 +33,7 @@ class Things:
             "username": username,
             "password": password,
             "car_number": car_number,
-            "time": date
-
+            "time": date,
         }
         print(data)
         try:
@@ -77,7 +76,7 @@ class Things:
         data = {
             "cmd": "unlock_car",
             "booking_number": booking_number,
-            "car_number": car_number
+            "car_number": car_number,
         }
         try:
             send_queue.put(data)
@@ -103,7 +102,7 @@ class Things:
         data = {
             "cmd": "return_car",
             "booking_number": booking_number,
-            "return_car_number": return_car_number
+            "return_car_number": return_car_number,
         }
         try:
             send_queue.put(data)
@@ -123,7 +122,6 @@ class Menu:
     def __init__(self):
         self.thing = Things()
         self.choices = {
-
             "1": self.thing.login,
             "2": self.thing.facial_recog_login,
             "3": self.thing.unlock_car,
