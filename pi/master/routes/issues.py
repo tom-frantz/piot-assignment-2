@@ -9,9 +9,10 @@ from flask_jwt_extended import (
 )
 from master import app, api, db
 from sqlalchemy.exc import SQLAlchemyError
-from master.models import issues
-from master.auth import checkAdmin
+from master.models import issues, cars
+from master.auth import checkAdmin, checkStaff
 import master.validation as validate
+import simplejson as json
 
 parser_new = reqparse.RequestParser(bundle_errors=True)
 parser_new.add_argument(
@@ -92,5 +93,67 @@ class UpdateIssue(Resource):
             return {'message': error}, 500
 
 
+class AllIssues(Resource):
+    @jwt_required
+    def get(self):
+        """
+        **Admin and Engineer access.**
+        """
+        current_user = get_jwt_identity()
+        role = current_user['role']
+        checkStaff(role)
+
+        try:
+            all_issues_by_car = []
+            car_list = (
+                issues.IssueModel.query.with_entities(issues.IssueModel.car_number)
+                .group_by(issues.IssueModel.car_number)
+                .all()
+            )
+            for i in car_list:
+                car_item = {}
+                car_result = cars.CarModel.query.filter_by(
+                    car_number=i.car_number
+                ).first()
+                if car_result:
+                    car_item['car_number'] = car_result.car_number
+                    car_item['make'] = car_result.make
+                    car_item['body_type'] = car_result.body_type
+                    car_item['seats'] = car_result.seats
+                    car_item['colour'] = car_result.colour
+                    car_item['cost_per_hour'] = json.dumps(
+                        car_result.cost_per_hour, use_decimal=True
+                    )
+                    car_item['latitude'] = json.dumps(
+                        car_result.latitude, use_decimal=True
+                    )
+                    car_item['longitude'] = json.dumps(
+                        car_result.longitude, use_decimal=True
+                    )
+                    car_item['lock_status'] = car_result.lock_status
+
+                    issue_result = issues.IssueModel.query.filter_by(
+                        car_number=i.car_number
+                    ).all()
+                    issue_list = list(
+                        map(
+                            lambda item: {
+                                'issue_id': item.issue_id,
+                                'description': item.description,
+                                'status': item.status,
+                            },
+                            issue_result,
+                        )
+                    )
+                    car_item['issues'] = issue_list
+                    all_issues_by_car.append(car_item)
+
+            return all_issues_by_car, 200
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return {'message': error}, 500
+
+
 api.add_resource(NewIssue, '/issues/new')
 api.add_resource(UpdateIssue, '/issues/update')
+api.add_resource(AllIssues, '/issues/all')
