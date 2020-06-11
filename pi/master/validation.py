@@ -57,6 +57,11 @@ def price(value, name):
 
 def role(value):
     value = value.strip().lower()
-    if value != "user" and value != "admin" and value != "engineer":
+    if (
+        value != "user"
+        and value != "admin"
+        and value != "engineer"
+        and value != "manager"
+    ):
         raise ValueError("A valid role should be user, admin or engineer.")
     return value.strip().lower()
