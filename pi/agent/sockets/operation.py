@@ -27,6 +27,7 @@ class GlobalConf(object):
 Global_url = "http://127.0.0.1:5000/{}"
 Global_return_queue = None
 
+
 def op_unlock_car(sio, data):
     """
     Unlock car message.
@@ -39,15 +40,11 @@ def op_unlock_car(sio, data):
             print("Please login first, system is to shut down.")
             sys.exit(0)
         else:
-            res = sio.emit(
-                uri, data, callback=op_unlock_car_callback(data)
-            )
+            res = sio.emit(uri, data, callback=op_unlock_car_callback(data))
         print(data)
     except Exception as err:
         traceback.print_exc()
-        jdata = {
-            "error": str(err)
-        }
+        jdata = {"error": str(err)}
         GlobalConf.recv_queue.put(jdata)
 
 
@@ -68,14 +65,10 @@ def op_return_car(sio, data):
             print("Please login first, system is to shut down.")
             sys.exit(0)
         else:
-            res = sio.emit(
-                uri, data, callback=op_return_car_callback(data)
-            )
+            res = sio.emit(uri, data, callback=op_return_car_callback(data))
     except Exception as err:
         traceback.print_exc()
-        jdata = {
-            "error": str(err)
-        }
+        jdata = {"error": str(err)}
         GlobalConf.recv_queue.put(jdata)
 
 
@@ -101,18 +94,14 @@ def op_login(sio, data):
     `cmd,data = "login", {"username": "user", "password": "password"}`
     """
     try:
-        res = sio.emit(
-            "login", data, callback=op_login_callback,
-        )
+        res = sio.emit("login", data, callback=op_login_callback,)
     except Exception as err:
-        jdata = {
-            "error": str(err)
-        }
+        jdata = {"error": str(err)}
         GlobalConf.recv_queue.put(jdata)
 
 
 def op_login_callback(data):
-    #{'success': True, 'username': '1', 'access_token': 'access_token', 'refresh_token': 'refresh_token'}
+    # {'success': True, 'username': '1', 'access_token': 'access_token', 'refresh_token': 'refresh_token'}
     GlobalConf.access_token = data.get("access_token")
     GlobalConf.refresh_token = data.get("refresh_token")
     GlobalConf.recv_queue.put(data)

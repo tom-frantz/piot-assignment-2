@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { GoogleApiWrapper, Map, Marker, Circle, InfoWindow } from "google-maps-react";
-import axios from "axios";
 import { Car, formatCars, UnformattedCar } from "../utils/tableUtils";
+import axios from "axios";
+import { GoogleApiWrapper, InfoWindow, Map, Marker } from "google-maps-react";
+import api from "../utils/api";
 
-interface MapProps {
+interface IssuesProps {
     google: any;
 }
 
-const MyMap: React.FC<MapProps> = (props: MapProps) => {
+const Issues: React.FC<IssuesProps> = (props: IssuesProps) => {
     const [cars, setCars] = useState<Car[]>([]);
 
     const [activeMarker, setActiveMarker] = useState(undefined);
     const [activeCar, setActiveCar] = useState<Car | undefined>(undefined);
 
     useEffect(() => {
-        axios.get("http://127.0.0.1:5000/cars/all").then((value: { data: UnformattedCar[] }) => {
+        axios.get(`http://${api}/cars/all`).then((value: { data: UnformattedCar[] }) => {
             setCars(value.data.map(formatCars));
         });
     }, []);
@@ -56,4 +57,4 @@ const MyMap: React.FC<MapProps> = (props: MapProps) => {
     );
 };
 
-export default GoogleApiWrapper({ apiKey: "AIzaSyA251T6B4lBT15MrIlRF4wDAeWe4wnyKgA" })(MyMap);
+export default GoogleApiWrapper({ apiKey: "AIzaSyA251T6B4lBT15MrIlRF4wDAeWe4wnyKgA" })(Issues);

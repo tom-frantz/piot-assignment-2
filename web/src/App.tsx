@@ -15,6 +15,9 @@ import PrivateRoute from "./containers/PrivateRoute";
 import Register from "./screens/Register";
 import Bookings from "./screens/Bookings";
 import MyMap from "./screens/MyMap";
+import Dashboard from "./screens/Dashboard";
+import Issues from "./screens/Issues";
+import Users from "./screens/Users";
 
 const { Content, Header, Footer } = Layout;
 
@@ -26,7 +29,7 @@ export const getAuthTimer = () => {
 
 type FullAuth = { access_token: string; refresh_token: string; timeout: number };
 
-export type Auth = FullAuth | { refresh_token: string } | undefined;
+export type Auth = FullAuth | undefined;
 
 function AppNavigator() {
     const [auth, setAuthFn] = useState<Auth>(undefined);
@@ -87,16 +90,30 @@ function AppNavigator() {
 
     useEffect(() => {
         const refresh_token = localStorage.getItem("refresh_token");
-        console.log("HEY AUTH");
-        console.log(refresh_token);
-        if (refresh_token) setAuthFn({ refresh_token });
+
+        if (refresh_token) {
+            axios
+                .create()
+                .post(
+                    "http://127.0.0.1:5000/auth/refresh",
+                    {},
+                    { headers: { Authorization: `Bearer ${refresh_token}` } }
+                )
+                .then((values: any) => {
+                    setAuth({
+                        refresh_token: values.data.refresh_token as string,
+                        access_token: values.data.access_token as string,
+                        timeout: getAuthTimer(),
+                    });
+                });
+        }
     }, []);
 
     return (
         <Router history={history}>
-            <Layout style={{ height: "100vh" }}>
+            <Layout style={{ minHeight: "100vh" }}>
                 <Header>
-                    <Navbar auth={auth !== undefined} setAuth={setAuth} />
+                    <Navbar auth={auth?.access_token || null} setAuth={setAuth} />
                 </Header>
                 <Content style={{ display: "flex", flexGrow: 1, justifyContent: "center" }}>
                     <Switch>
@@ -109,14 +126,55 @@ function AppNavigator() {
                         <Route path={"/register"} exact>
                             {!auth ? <Register setAuth={setAuth} /> : <Redirect to={"/cars"} />}
                         </Route>
-                        <PrivateRoute auth={auth !== undefined} path={"/cars"} exact>
+                        <PrivateRoute
+                            access_token={auth?.access_token || null}
+                            role={"admin"}
+                            path={"/cars"}
+                            exact
+                        >
                             <Cars />
                         </PrivateRoute>
-                        <PrivateRoute auth={auth !== undefined} path={"/bookings"} exact>
+                        <PrivateRoute
+                            access_token={auth?.access_token || null}
+                            role={"admin"}
+                            path={"/users"}
+                            exact
+                        >
+                            <Users />
+                        </PrivateRoute>
+                        <PrivateRoute
+                            access_token={auth?.access_token || null}
+                            role={"admin"}
+                            path={"/bookings"}
+                            exact
+                        >
                             <Bookings />
                         </PrivateRoute>
-                        <PrivateRoute auth={auth !== undefined} path={"/map"} exact>
+                        <PrivateRoute
+                            access_token={auth?.access_token || null}
+                            role={"admin"}
+                            path={"/map"}
+                            exact
+                        >
                             <MyMap />
+                        </PrivateRoute>
+
+                        <PrivateRoute
+                            access_token={auth?.access_token || null}
+                            role={"engineer"}
+                            path={"/issues"}
+                            exact
+                        >
+                            <Issues />
+                        </PrivateRoute>
+
+                        <PrivateRoute
+                            access_token={auth?.access_token || null}
+                            role={"manager"}
+                            path={"/dashboard"}
+                            exact
+                        >
+                            <Dashboard />
                         </PrivateRoute>
                     </Switch>
                 </Content>

@@ -80,7 +80,9 @@ def test_user_profile(client):
 
 
 def test_new_login_valid(client):
-    res = client.post('/auth/new', data=dict(username='user01', password='password01'))
+    res = client.post(
+        '/access_token/new', data=dict(username='user01', password='password01')
+    )
     result = utils.convert_byte_to_dict(res.data)
     assert result['access_token'] != None
     assert res.status_code == 201
@@ -88,7 +90,7 @@ def test_new_login_valid(client):
 
 def test_new_login_invalid(client):
     res = client.post(
-        '/auth/new', data=dict(username='user01', password='passhkjhjjjklj')
+        '/access_token/new', data=dict(username='user01', password='passhkjhjjjklj')
     )
     assert res.status_code == 401
 
@@ -96,10 +98,11 @@ def test_new_login_invalid(client):
 def test_token_refresh(client):
     identity = {'username': 'user01'}
     token = ""
-    with app.test_request_context('/auth/refresh'):
+    with app.test_request_context('/access_token/refresh'):
         token = create_refresh_token(identity=identity)
         res = client.post(
-            '/auth/refresh', headers={"Authorization": "Bearer {}".format(token)}
+            '/access_token/refresh',
+            headers={"Authorization": "Bearer {}".format(token)},
         )
         result = utils.convert_byte_to_dict(res.data)
         assert result['access_token'] != None

@@ -11,14 +11,14 @@ def unlock_car(data):
     car_number = data["car_number"]
     try:
         result = cars.CarModel.query.filter_by(car_number=car_number).first()
-        
+
         if result is None:
             return 401, 'There\'s no such car in database.'
         else:
             result.lock_status = False
             db.session.commit()
             return 100, 'Car unlocked successfully.'
-    
+
     except Exception as e:
         error = str(e.__dict__['orig'])
         return 500, error

@@ -91,8 +91,6 @@ const Bookings: React.FC<BookingsProps> = (props: BookingsProps) => {
                     title: "Actions",
                     key: "actions",
                     render: (text, record: Booking) => {
-                        console.log(record);
-
                         return (
                             <Space style={{ flexDirection: "column", alignItems: "flex-start" }}>
                                 <a>See Car</a>

@@ -1,5 +1,5 @@
 """
-RESTful API Routes: `/auth/{endpoint}`
+RESTful API Routes: `/access_token/{endpoint}`
 """
 
 from flask_restful import reqparse, abort, Resource, inputs
@@ -46,7 +46,7 @@ def check_user(current_user, password):
     if not ok:
         abort(401, message=msg)
     return result["role"]
-    
+
 
 class AccessToken(Resource):
     """
@@ -137,5 +137,5 @@ class ChangePassword(Resource):
             return {"Error": error}, 500
 
 
-api.add_resource(AccessToken, '/auth/new')
-api.add_resource(TokenRefresh, '/auth/refresh')
+api.add_resource(AccessToken, '/access_token/new')
+api.add_resource(TokenRefresh, '/access_token/refresh')
