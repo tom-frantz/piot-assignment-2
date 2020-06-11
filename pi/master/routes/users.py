@@ -41,15 +41,11 @@ parser_info = reqparse.RequestParser(bundle_errors=True)
 parser_info.add_argument(
     'username', type=inputs.regex(r'^[A-Za-z0-9-_]{3,15}$'), required=True
 )
-parser_info.add_argument(
-    'first_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$')
-)
-parser_info.add_argument(
-    'last_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$')
-)
+parser_info.add_argument('first_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$'))
+parser_info.add_argument('last_name', type=inputs.regex(r'^[A-Za-z0-9-_]{1,30}$'))
 parser_info.add_argument(
     'email',
-    type=inputs.regex(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$')
+    type=inputs.regex(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$'),
 )
 parser_info.add_argument('role', type=validate.role)
 
@@ -73,8 +69,7 @@ parser_admin.add_argument(
     type=inputs.regex(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$'),
     required=True,
 )
-parser_admin.add_argument(
-    'role', type=validate.role, required=True)
+parser_admin.add_argument('role', type=validate.role, required=True)
 
 
 def check_duplicate_user(user):
@@ -86,7 +81,7 @@ def check_duplicate_user(user):
         if result is not None:
             abort(403, message="Username has already been taken.")
     except SQLAlchemyError as e:
-        #error = str(e.__dict__['orig'])
+        # error = str(e.__dict__['orig'])
         return {'message': str(e)}, 500
 
 
@@ -94,6 +89,7 @@ class Register(Resource):
     """
     New user registration. No admin or engineer account allowed.
     """
+
     def post(self):
         """
         :param str username: required.
@@ -138,10 +134,12 @@ class Register(Resource):
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
+
 class AdminRegister(Resource):
     """
     New user registration for admin manager and engineer accounts.
     """
+
     @jwt_required
     def post(self):
         """
@@ -178,7 +176,7 @@ class AdminRegister(Resource):
             first_name=first_name,
             last_name=last_name,
             email=email,
-            role=role
+            role=role,
         )
         try:
             new_user.add_new_record()
@@ -194,10 +192,12 @@ class AdminRegister(Resource):
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
+
 class Profile(Resource):
     """
     View current user profile.
     """
+
     @jwt_required
     def get(self):
         """
@@ -221,10 +221,12 @@ class Profile(Resource):
             error = str(se.__dict__['orig'])
             return {"Error": error}, 500
 
+
 class AllUsers(Resource):
     """
     Get all users with corresponding bookings.
     """
+
     @jwt_required
     def get(self):
         """
@@ -249,10 +251,10 @@ class AllUsers(Resource):
                     "last_name": i.last_name,
                     "email": i.email,
                     "role": i.role,
-                    "bookings": []
+                    "bookings": [],
                 }
                 all_bookings = bookings.BookingModel.query.filter_by(
-                    username = i.username
+                    username=i.username
                 ).all()
                 if len(all_bookings) > 0:
                     booking_list = list(
@@ -275,10 +277,12 @@ class AllUsers(Resource):
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
 
+
 class ChangeUserDetail(Resource):
     """
     Change user details: first name, last name, and email.
     """
+
     @jwt_required
     def put(self):
         """
@@ -292,7 +296,7 @@ class ChangeUserDetail(Resource):
         current_user = get_jwt_identity()
         role = current_user['role']
         checkAdmin(role)
-        
+
         try:
             args = parser_info.parse_args()
             username = args['username']
@@ -300,28 +304,32 @@ class ChangeUserDetail(Resource):
 
             if args["first_name"]:
                 result.first_name = args["first_name"]
-        
+
             if args["last_name"]:
                 result.last_name = args["last_name"]
-        
+
             if args["email"]:
                 result.email = args["email"]
 
-            if args["role"]: 
+            if args["role"]:
                 result.role = args["role"]
 
             db.session.commit()
 
-            return {
-                'username': result.username,
-                'first_name': result.first_name,
-                'last_name': result.last_name,
-                'email': result.email,
-                'role': result.role    
-                }, 200
+            return (
+                {
+                    'username': result.username,
+                    'first_name': result.first_name,
+                    'last_name': result.last_name,
+                    'email': result.email,
+                    'role': result.role,
+                },
+                200,
+            )
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
+
 
 class DeleteUser(Resource):
     @jwt_required
@@ -348,6 +356,7 @@ class DeleteUser(Resource):
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
+
 
 api.add_resource(Register, '/users/register')
 api.add_resource(AdminRegister, '/users/admin-register')
