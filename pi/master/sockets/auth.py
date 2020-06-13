@@ -1,5 +1,6 @@
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token
 from master import socketio
+from master.models import users
 from master.auth import verify_password, check_user_exists
 from master.sockets.utils import success_response, error_response
 
@@ -36,20 +37,21 @@ def login(data):
 def bluetooth_login(data):
     print("recive socket")
     engineer_mac_addr = data["engineer_mac"]
-    pre_input_mac = "54:A8:87:F0:DA:A9"
-    if engineer_mac_addr == pre_input_mac:
-        ok = True
-    if not ok:
-        return error_response("engineer login fail")
 
-    identity = {
-        "username": "engineer",
+    result =  users.UserModel.query.filter_by(mac_address=engineer_mac_addr).first()
+    user_name = result.username
+    print(user_name,result.mac_address)
+    if result is None:
+        return error_response("engineer login fail")
+    else:
+        identity = {
+        "username": user_name,
         "role": "engineer"
-    }
-    access_token = create_access_token(identity=identity)
-    refresh_token = create_refresh_token(identity=identity)
+        }
+        access_token = create_access_token(identity=identity)
+        refresh_token = create_refresh_token(identity=identity)
     return success_response(
-        username="engineer", access_token=access_token, refresh_token=refresh_token,
+        username=user_name, access_token=access_token, refresh_token=refresh_token,
     )
 
 

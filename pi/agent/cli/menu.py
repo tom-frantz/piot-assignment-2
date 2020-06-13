@@ -93,7 +93,6 @@ class Things:
             recv = recv_queue.get()
             if recv:
                 break
-        print("Car {} unlocked successfully.".format(data['car_number']))
 
     def return_car(self, send_queue, recv_queue):
         """
@@ -103,9 +102,7 @@ class Things:
         :param str car_number: required.
         """
         booking_number = input("Please iuput your booking number:")
-        print(booking_number)
         return_car_number = input("Please iuput your return car number:")
-        print(return_car_number)
         data = {
             "cmd": "return_car",
             "booking_number": booking_number,
@@ -120,45 +117,40 @@ class Things:
             if recv:
                 break
 
-#     def lookUpNearbyBluetoothDevice(self):
-#         nearby_devices = bluetooth.discover_devices()
-#         my_bluetooth = '43:01:B7:64:12:FC'
-#         for bdaddr in nearby_devices:
-#             if bdaddr == my_bluetooth :
-#                 return bdaddr
 
     def search_bluetooth(self, send_queue, recv_queue):
         child = pexpect.spawn("bluetoothctl")
         child.send("scan on\n")
-        pre_input_mac = "54:A8:87:F0:DA:A9"
+        pre_input_mac = "2C:F0:EE:1F:E2:E5"
+        mac2 = "F0:18:98:00:F5:79"
         start_time = time.time()
-#         a = self.lookUpNearbyBluetoothDevice()
-#         print(a)
+        
         try:
             while True:
                 child.expect("Device (([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2}))")
                 bdaddr = child.match.group(1)
                 print(bdaddr)
                 bdaddr_str = bytes.decode(bdaddr)
-                if bdaddr_str == pre_input_mac:
+                if bdaddr_str == pre_input_mac or bdaddr_str == mac2:
                     child.send("scan off\n")
                     child.send("quit\n")
                     print('has found the bluetooth')
                     data = {
+                        "cmd":"search_bluetooth",
                         "engineer_mac": bdaddr_str
                     }
-                    a = send_queue.put(data)
-                    print(a)
-                    if a is None:
-                        pass
-                    else:
-                        print("send")
-                    return True
+                    try:
+                        send_queue.put(data)
+                    except:
+                        traceback.print_exc()
+                    while 1:
+                        recv = recv_queue.get()
+                        if recv:
+                            return True
                 past_time = time.time()-start_time
                 if past_time > Global_max_scan_time:
                     print("not found any near engineer device.")
                     return False
-                    # results.write(bdaddr+"\n")
         except KeyboardInterrupt:
             child.close()
             results.close()

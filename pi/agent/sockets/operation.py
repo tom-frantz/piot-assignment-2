@@ -42,7 +42,6 @@ def op_unlock_car(sio, data):
             res = sio.emit(
                 uri, data, callback=op_unlock_car_callback(data)
             )
-        print(data)
     except Exception as err:
         traceback.print_exc()
         jdata = {
@@ -52,7 +51,7 @@ def op_unlock_car(sio, data):
 
 
 def op_unlock_car_callback(data):
-    print("op_unlock_car_callback in process")
+    print("Car {} unlocked successfully.".format(data['car_number']))
     GlobalConf.recv_queue.put(data)
 
 
@@ -80,7 +79,7 @@ def op_return_car(sio, data):
 
 
 def op_return_car_callback(data):
-    print("op_return_car_callback in process.")
+    print("Car return successfully.")
     GlobalConf.recv_queue.put(data)
 
 
@@ -118,14 +117,10 @@ def op_login_callback(data):
     GlobalConf.recv_queue.put(data)
 
 def op_bluetooth_search(sio, data):
-    print("op_bluetooth_search in operation.")
     try:
         res = sio.emit(
             "bluetooth_login", data, callback=op_bluetooth_search_callback,
         )
-        print(res)
-        if res is True:
-            print("send socket")
     except Exception as err:
         jdata = {
             "error": str(err)
@@ -134,7 +129,14 @@ def op_bluetooth_search(sio, data):
 
 
 def op_bluetooth_search_callback(data):
-    print("op_bluetooth_seaarch_callback in processing.")
+    if data is None:
+        print("you did not login, please scan nearby devices and try again")
+    else:
+        GlobalConf.access_token = data.get("access_token")
+        GlobalConf.refresh_token = data.get("refresh_token")
+        print("you have login sucessfully, your login details are:")
+        username = data['username']
+        print("username is :" + username+" role is: Engineer")
     GlobalConf.recv_queue.put(data)
 
 
@@ -154,6 +156,8 @@ def client_start(send_queue, recv_queue):
             op_unlock_car(sio, data)
         elif cmd == "return_car":
             op_return_car(sio, data)
+        elif cmd == "search_bluetooth":
+            op_bluetooth_search(sio, data)
 
 
 @sio.event
