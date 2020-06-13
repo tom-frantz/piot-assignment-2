@@ -27,6 +27,7 @@ class GlobalConf(object):
 Global_url = "http://127.0.0.1:5000/{}"
 Global_return_queue = None
 
+
 def op_unlock_car(sio, data):
     """
     Unlock car message.
@@ -39,19 +40,18 @@ def op_unlock_car(sio, data):
             print("Please login first, system is to shut down.")
             sys.exit(0)
         else:
-            res = sio.emit(
-                uri, data, callback=op_unlock_car_callback(data)
-            )
+            res = sio.emit(uri, data, callback=op_unlock_car_callback(data))
     except Exception as err:
         traceback.print_exc()
-        jdata = {
-            "error": str(err)
-        }
+        jdata = {"error": str(err)}
         GlobalConf.recv_queue.put(jdata)
 
 
 def op_unlock_car_callback(data):
-    print("Car {} unlocked successfully.".format(data['car_number']))
+    """
+    Shows the unlock car action is sucessful or not.
+    """
+    print("Car {} unlocked successfully.".format(data["car_number"]))
     GlobalConf.recv_queue.put(data)
 
 
@@ -67,18 +67,17 @@ def op_return_car(sio, data):
             print("Please login first, system is to shut down.")
             sys.exit(0)
         else:
-            res = sio.emit(
-                uri, data, callback=op_return_car_callback(data)
-            )
+            res = sio.emit(uri, data, callback=op_return_car_callback(data))
     except Exception as err:
         traceback.print_exc()
-        jdata = {
-            "error": str(err)
-        }
+        jdata = {"error": str(err)}
         GlobalConf.recv_queue.put(jdata)
 
 
 def op_return_car_callback(data):
+    """
+    Shows the return car action is sucessful or not.
+    """
     print("Car return successfully.")
     GlobalConf.recv_queue.put(data)
 
@@ -87,7 +86,7 @@ def refresh(socket):
     socket.emit(
         "refresh",
         {
-            "refresh_token": 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1ODkwODEzMzIsIm5iZiI6MTU4OTA4MTMzMiwianRpIjoiNWFiYzc5ODQtMTMyYi00MWE4LWFmODAtYjIyMGQ1NzI1ZWY2IiwiZXhwIjoxNTkxNjczMzMyLCJpZGVudGl0eSI6InVzZXIiLCJ0eXBlIjoicmVmcmVzaCJ9.If9yQtW_ptRk9vJ2AsmnZ-xqzx1zo1yA_O6LykrObRU'
+            "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1ODkwODEzMzIsIm5iZiI6MTU4OTA4MTMzMiwianRpIjoiNWFiYzc5ODQtMTMyYi00MWE4LWFmODAtYjIyMGQ1NzI1ZWY2IiwiZXhwIjoxNTkxNjczMzMyLCJpZGVudGl0eSI6InVzZXIiLCJ0eXBlIjoicmVmcmVzaCJ9.If9yQtW_ptRk9vJ2AsmnZ-xqzx1zo1yA_O6LykrObRU"
         },
         callback=refresh_callback,
     )
@@ -100,43 +99,47 @@ def op_login(sio, data):
     `cmd,data = "login", {"username": "user", "password": "password"}`
     """
     try:
-        res = sio.emit(
-            "login", data, callback=op_login_callback,
-        )
+        res = sio.emit("login", data, callback=op_login_callback,)
     except Exception as err:
-        jdata = {
-            "error": str(err)
-        }
+        jdata = {"error": str(err)}
         GlobalConf.recv_queue.put(jdata)
 
 
 def op_login_callback(data):
-    #{'success': True, 'username': '1', 'access_token': 'access_token', 'refresh_token': 'refresh_token'}
+    """
+    Shows the login action is sucessul or not.
+    """
     GlobalConf.access_token = data.get("access_token")
     GlobalConf.refresh_token = data.get("refresh_token")
     GlobalConf.recv_queue.put(data)
 
+
 def op_bluetooth_search(sio, data):
+    """
+    Search the nearby devices and send a mac address to the MP via socket
+
+    :param String mac_address: required
+    """
+
     try:
-        res = sio.emit(
-            "bluetooth_login", data, callback=op_bluetooth_search_callback,
-        )
+        res = sio.emit("bluetooth_login", data, callback=op_bluetooth_search_callback,)
     except Exception as err:
-        jdata = {
-            "error": str(err)
-            }
+        jdata = {"error": str(err)}
         GlobalConf.recv_queue.put(jdata)
 
 
 def op_bluetooth_search_callback(data):
+    """
+    Shows the bluetooth searching action is sucessful or not.
+    """
     if data is None:
         print("you did not login, please scan nearby devices and try again")
     else:
         GlobalConf.access_token = data.get("access_token")
         GlobalConf.refresh_token = data.get("refresh_token")
         print("you have login sucessfully, your login details are:")
-        username = data['username']
-        print("username is :" + username+" role is: Engineer")
+        username = data["username"]
+        print("username is :" + username + " role is: Engineer")
     GlobalConf.recv_queue.put(data)
 
 
@@ -144,7 +147,7 @@ def client_start(send_queue, recv_queue):
     """
     Client menu command patterns.
     """
-    sio.connect('http://localhost:5000')
+    sio.connect("http://localhost:5000")
     # sio.wait()
     GlobalConf.recv_queue = recv_queue
     while 1:
@@ -162,10 +165,10 @@ def client_start(send_queue, recv_queue):
 
 @sio.event
 def connect():
-    print(' ')
-    print('connection established')
-    print(' ')
+    print(" ")
+    print("connection established")
+    print(" ")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

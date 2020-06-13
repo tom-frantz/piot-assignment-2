@@ -2,8 +2,9 @@
 Console screen for AP menu.
 """
 import sys
-#import agent.facial_recognition.recogniser as recogniser
-#import cv2
+
+# import agent.facial_recognition.recogniser as recogniser
+# import cv2
 import traceback
 import time
 import pexpect
@@ -38,8 +39,7 @@ class Things:
             "username": username,
             "password": password,
             "car_number": car_number,
-            "time": date
-
+            "time": date,
         }
         print(data)
         try:
@@ -83,7 +83,7 @@ class Things:
         data = {
             "cmd": "unlock_car",
             "booking_number": booking_number,
-            "car_number": car_number
+            "car_number": car_number,
         }
         try:
             send_queue.put(data)
@@ -106,7 +106,7 @@ class Things:
         data = {
             "cmd": "return_car",
             "booking_number": booking_number,
-            "return_car_number": return_car_number
+            "return_car_number": return_car_number,
         }
         try:
             send_queue.put(data)
@@ -117,14 +117,17 @@ class Things:
             if recv:
                 break
 
-
     def search_bluetooth(self, send_queue, recv_queue):
+        """
+        Search the nearby engineer devices.
+
+        """
         child = pexpect.spawn("bluetoothctl")
         child.send("scan on\n")
         pre_input_mac = "2C:F0:EE:1F:E2:E5"
         mac2 = "F0:18:98:00:F5:79"
         start_time = time.time()
-        
+
         try:
             while True:
                 child.expect("Device (([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2}))")
@@ -134,11 +137,8 @@ class Things:
                 if bdaddr_str == pre_input_mac or bdaddr_str == mac2:
                     child.send("scan off\n")
                     child.send("quit\n")
-                    print('has found the bluetooth')
-                    data = {
-                        "cmd":"search_bluetooth",
-                        "engineer_mac": bdaddr_str
-                    }
+                    print("has found the bluetooth")
+                    data = {"cmd": "search_bluetooth", "engineer_mac": bdaddr_str}
                     try:
                         send_queue.put(data)
                     except:
@@ -147,7 +147,7 @@ class Things:
                         recv = recv_queue.get()
                         if recv:
                             return True
-                past_time = time.time()-start_time
+                past_time = time.time() - start_time
                 if past_time > Global_max_scan_time:
                     print("not found any near engineer device.")
                     return False
@@ -164,7 +164,6 @@ class Menu:
     def __init__(self):
         self.thing = Things()
         self.choices = {
-
             "1": self.thing.login,
             "2": self.thing.facial_recog_login,
             "3": self.thing.unlock_car,
