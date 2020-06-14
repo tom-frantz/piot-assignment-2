@@ -9,6 +9,7 @@ autopep8 = "*"
 [packages]
 flask = "*"
 flask-restful = "*"
+flask-sqlalchemy = "*"
 master = {editable = true,path = "."}
 passlib = "*"
 flask-jwt-extended = "*"
@@ -19,8 +20,7 @@ flask-cors = "*"
 simplejson = "*"
 pytest = "*"
 sphinx = "*"
-cv2 = "*"
-opencv-python = "*"
+flask-mail = "*"
 
 [requires]
 python_version = "3.8"

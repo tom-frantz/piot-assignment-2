@@ -286,8 +286,11 @@ class ChangeUserDetail(Resource):
     @jwt_required
     def put(self):
         """
-        :param str _: required.
-        :param str _: required.
+        :param str username: required.
+        :param str first_name: optional.
+        :param str last_name: optional.
+        :param str email: optional.
+        :param str role: optional.
 
         - JWT required.
         - **Admin only.**

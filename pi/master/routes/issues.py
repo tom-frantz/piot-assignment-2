@@ -7,8 +7,9 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity,
 )
-from master import app, api, db
+from master import app, api, db, mail
 from sqlalchemy.exc import SQLAlchemyError
+from flask_mail import Message
 from master.models import issues, cars
 from master.auth import checkAdmin, checkStaff
 import master.validation as validate
@@ -22,9 +23,7 @@ parser_new.add_argument('description', type=inputs.regex(r'(.*?)'), required=Tru
 
 parser_update = reqparse.RequestParser(bundle_errors=True)
 parser_update.add_argument('issue_id', type=inputs.positive, required=True)
-parser_update.add_argument(
-    'description', type=inputs.regex(r'^[A-Za-z0-9-_ ]{1,1000}$')
-)
+parser_update.add_argument('description', type=validate.string_1000, required=True)
 # True: "true", False: "false"
 parser_update.add_argument('status', type=inputs.boolean)
 
@@ -32,6 +31,14 @@ parser_update.add_argument('status', type=inputs.boolean)
 class NewIssue(Resource):
     @jwt_required
     def post(self):
+        """
+        :param str car_number: required, length 1-6.
+        :param str description: required, length 1-1000.
+
+        - JWT required.
+        - **Admin only.**
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         current_user = get_jwt_identity()
         role = current_user['role']
         checkAdmin(role)
@@ -44,14 +51,15 @@ class NewIssue(Resource):
                 car_number=car_number, description=description
             )
             new_issue.save_to_db()
-            return (
-                {
-                    'message': 'Issue ID {} for Car {} submitted.'.format(
-                        new_issue.issue_id, new_issue.car_number
-                    )
-                },
-                201,
-            )
+
+            # send a mail
+            body = "Issue: {} | Car {} | Description: {}.".format(new_issue.issue_id, car_number, description)
+            msg = Message(body, recipients=['aiculus2019@gmail.com','vonaka2183@lercjy.com'])
+            mail.send(msg)
+
+            return {
+                'message': 'Issue ID {} for Car {} submitted.'.format(new_issue.issue_id, new_issue.car_number)
+            }, 201
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return {'message': error}, 500
@@ -60,6 +68,15 @@ class NewIssue(Resource):
 class UpdateIssue(Resource):
     @jwt_required
     def put(self):
+        """
+        :param int issue_id: required.
+        :param str description: optional.
+        :param bool status: optional, solved = "true", unsolved = "false".
+
+        - JWT required.
+        - **Admin only.**
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         current_user = get_jwt_identity()
         role = current_user['role']
         checkAdmin(role)
@@ -95,7 +112,9 @@ class AllIssues(Resource):
     @jwt_required
     def get(self):
         """
-        **Admin and Engineer access.**
+        - JWT required.
+        - **Admin/Engineer only.**
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
         """
         current_user = get_jwt_identity()
         role = current_user['role']

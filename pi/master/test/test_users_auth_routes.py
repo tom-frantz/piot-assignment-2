@@ -22,13 +22,24 @@ def client():
         first_name='Apple',
         last_name='Chan',
         email='user01@email.com',
+        role ='admin'
+    )
+
+    user_2 = UserModel(
+        username='user02',
+        password=sha256.hash('password02'),
+        first_name='Melon',
+        last_name='Kuang',
+        email='user02@email.com',
+        role='user'
     )
 
     with app.app_context():
         db.drop_all()
         db.create_all()
         user.add_new_record()
-        db.session.commit()
+        user_2.add_new_record()
+        #db.session.commit()
 
     yield client
 
@@ -42,11 +53,11 @@ def test_register_user_valid(client):
     res = client.post(
         "/users/register",
         data=dict(
-            username='user02',
-            password='password02',
+            username='user03',
+            password='password03',
             first_name='Banana',
             last_name='Lin',
-            email='user02@email.com',
+            email='user03@email.com',
         ),
     )
     assert res.status_code == 201
@@ -107,3 +118,95 @@ def test_token_refresh(client):
         result = utils.convert_byte_to_dict(res.data)
         assert result['access_token'] != None
         assert res.status_code == 201
+
+############ STAFF FEATURES ##############
+
+def test_user_list(client):
+    identity = {'username': 'user01', 'role': 'admin'}
+    token = ""
+    with app.test_request_context('/users/all'):
+        token = create_access_token(identity=identity)
+        res = client.get(
+            '/users/all', headers={"Authorization": "Bearer {}".format(token)}
+        )
+        result = utils.convert_byte_to_dict(res.data)
+        assert len(result)==2
+        assert res.status_code == 200
+
+def test_user_list_invalid(client):
+    identity = {'username': 'user02', 'role': 'user'}
+    token = ""
+    with app.test_request_context('/users/all'):
+        token = create_access_token(identity=identity)
+        res = client.get(
+            '/users/all', headers={"Authorization": "Bearer {}".format(token)}
+        )
+        assert res.status_code == 403 #authorization failure
+
+def test_user_update(client):
+    identity = {'username': 'user01', 'role': 'admin'}
+    token = ""
+    with app.test_request_context('/users/update'):
+        token = create_access_token(identity=identity)
+        res = client.put(
+            '/users/update',
+            data=dict(
+                username='user01',
+                email='user01new@email.com',
+            ), 
+            headers={"Authorization": "Bearer {}".format(token)}
+        )
+        result = utils.convert_byte_to_dict(res.data)
+        assert result['email']== 'user01new@email.com'
+        assert res.status_code == 200
+
+def test_user_list(client):
+    identity = {'username': 'user01', 'role': 'admin'}
+    token = ""
+    with app.test_request_context('/users/delete'):
+        token = create_access_token(identity=identity)
+        res = client.delete(
+            '/users/delete/user02', headers={"Authorization": "Bearer {}".format(token)}
+        )
+        result = utils.convert_byte_to_dict(res.data)
+        assert result['message'].startswith('User')
+        assert res.status_code == 200
+
+def test_register_manager(client):
+    identity = {'username': 'user01', 'role': 'admin'}
+    token = ""
+    with app.test_request_context('/users/admin-register'):
+        token = create_access_token(identity=identity)
+        res = client.post(
+            '/users/admin-register', 
+            data=dict(
+                username='user03',
+                password='password03',
+                first_name='Banana',
+                last_name='Lin',
+                email='03@email.com',
+                role='manager'
+            ),
+            headers={"Authorization": "Bearer {}".format(token)}
+        )
+        assert res.status_code == 201
+
+def test_register_engineer(client):
+    identity = {'username': 'user01', 'role': 'admin'}
+    token = ""
+    with app.test_request_context('/users/admin-register'):
+        token = create_access_token(identity=identity)
+        res = client.post(
+            '/users/admin-register', 
+            data=dict(
+                username='user03',
+                password='password03',
+                first_name='Banana',
+                last_name='Lin',
+                email='03@email.com',
+                role='engineer'
+            ),
+            headers={"Authorization": "Bearer {}".format(token)}
+        )
+        assert res.status_code == 201
+    

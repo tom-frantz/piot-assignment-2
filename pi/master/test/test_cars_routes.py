@@ -27,6 +27,19 @@ def client():
         cost_per_hour=12,
         lock_status=True,
     )
+
+    car_2 = CarModel(
+        car_number='KK0002',
+        make='Honda',
+        body_type='Hatchback',
+        colour='black',
+        seats=5,
+        latitude=-37.804663448,
+        longitude=144.957996168,
+        cost_per_hour=10,
+        lock_status=True,
+    )
+
     booking = BookingModel(
         car_number='KK0001',
         username='user01',
@@ -37,14 +50,15 @@ def client():
         db.drop_all()
         db.create_all()
         car.save_to_db()
+        car_2.save_to_db()
         booking.save_to_db()
-        db.session.commit()
+        # db.session.commit()
 
     yield client
 
 
 def test_add_new_car(client):
-    identity = {'username': 'user01'}
+    identity = {'username': 'user01', 'role':'admin'}
     token = ""
     with app.test_request_context('/cars/new'):
         token = create_access_token(identity=identity)
@@ -112,4 +126,16 @@ def test_get_all_cars(client):
         res = client.get(
             "/cars/all", headers={"Authorization": "Bearer {}".format(token)}
         )
+        assert res.status_code == 200
+
+def test_delete_car(client):
+    identity = {'username': 'user01', 'role': 'admin'}
+    token = ""
+    with app.test_request_context("/cars/delete"):
+        token = create_access_token(identity=identity)
+        res = client.delete(
+            "/cars/delete/KK002", headers={"Authorization": "Bearer {}".format(token)}
+        )
+        result = utils.convert_byte_to_dict(res.data)
+        assert result['message'].startswith('Car')
         assert res.status_code == 200

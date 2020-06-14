@@ -37,8 +37,7 @@ def string_30(value):
 
 
 def string_1000(value):
-    value = str(value)
-    if len(value > 1000):
+    if len(value) > 1000:
         raise ValueError("Maximum length allowed: 1000 characters.")
     return value
 

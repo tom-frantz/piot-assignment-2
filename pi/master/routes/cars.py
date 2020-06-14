@@ -65,6 +65,7 @@ class NewCar(Resource):
         :param str car_number: required.
 
         - JWT required.
+        - "Admin-only."
         - Header: `\"Authorization\": \"Bearer {access_token}\"`
         """
         args = parser_new.parse_args()
@@ -285,6 +286,7 @@ class AllCars(Resource):
     def get(self):
         """
         - JWT required.
+        - **Admin Only.**
         - Header: `\"Authorization\": \"Bearer {access_token}\"`
         """
         try:
@@ -331,7 +333,29 @@ class AllCars(Resource):
 
 
 class UpdateCar(Resource):
+    """
+    Update car details queried by car number.
+    """
+    
     def put(self):
+        """
+        :param str car_number: required.
+        :param str make: optional.
+        :param str body_type: optional.
+        :param str colour: optional.
+        :param int seats: optional.
+        :param latitude: optional
+        :type latitude: decimal
+        :param longitude: optional
+        :type longitude: decimal
+        :param cost_per_hour: optional
+        :type cost_per_hour: decimal
+        :param bool lock_status: optional
+
+        - JWT required.
+        - **Admin only.**
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         args = parser_info.parse_args()
         car_number = args['car_number']
 
@@ -378,7 +402,7 @@ class UpdateCar(Resource):
 
 class DeleteCar(Resource):
     """
-    **Admin only**
+    Delete a car.
     """
 
     @jwt_required

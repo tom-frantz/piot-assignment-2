@@ -87,7 +87,7 @@ def test_add_booking_invalid(client):
             headers={"Authorization": "Bearer {}".format(token)},
         )
         result = utils.convert_byte_to_dict(res.data)
-        assert result['message'].startswith("Car")
+        assert result['message'].startswith("You")
         assert res.status_code == 403
 
 
