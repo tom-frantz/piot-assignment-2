@@ -10,8 +10,9 @@ Subpackages
    :maxdepth: 4
 
    agent.cli
-   agent.sockets
    agent.facial_recognition
+   agent.qrcode_scanning
+   agent.sockets
 
 Module contents
 ---------------

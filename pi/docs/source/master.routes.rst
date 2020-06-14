@@ -47,3 +47,11 @@ master.routes.bookings module
    :members:
    :undoc-members:
    :show-inheritance:
+
+master.routes.issues module
+-----------------------------
+
+.. automodule:: master.routes.issues
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -26,3 +26,10 @@ master.models.bookings module
 .. automodule:: master.models.bookings
    :members:
    :show-inheritance:
+
+master.models.issues module
+-----------------------------
+
+.. automodule:: master.models.issues
+   :members:
+   :show-inheritance:
