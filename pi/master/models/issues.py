@@ -3,6 +3,14 @@ from datetime import datetime
 
 
 class IssueModel(db.Model):
+    """
+    Issues table schema and validation rules.
+
+    :param int issue_id: primary key, 
+    :param str description:  length: 1-1000, required.
+    :param bool status: solved(`True`)/unsolved(`False`), required.
+
+    """
 
     __tablename__ = 'Issues'
 

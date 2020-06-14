@@ -77,6 +77,40 @@ class AccessToken(Resource):
             201,
         )
 
+class VerifyAdmin(Resource):
+    """
+    For voice recogtion: verify if the current user is an admin user.
+    """
+
+    def post(self):
+        """
+        :param str username: required.
+        :param str password: required.
+        """
+        args = parser_get_tokens.parse_args()
+        username = args['username']
+        password = args['password']
+
+        role = check_user(username, password)
+
+        if role == 'admin':
+            user_identity = {'username': username, 'role': role}
+            access_token = create_access_token(identity=user_identity)
+            refresh_token = create_refresh_token(identity=user_identity)
+
+            return (
+                {
+                    'username': username,
+                    'access_token': access_token,
+                    'refresh_token': refresh_token,
+                    'role': role
+                },
+                201,
+            )
+        else:
+            return (
+                {'username': username, 'role': role}
+            )
 
 class TokenRefresh(Resource):
     """
@@ -138,4 +172,5 @@ class ChangePassword(Resource):
 
 
 api.add_resource(AccessToken, '/auth/new')
+api.add_resource(VerifyAdmin, '/auth/admin-check')
 api.add_resource(TokenRefresh, '/auth/refresh')

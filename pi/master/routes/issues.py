@@ -33,6 +33,14 @@ parser_update.add_argument('status', type=inputs.boolean)
 class NewIssue(Resource):
     @jwt_required
     def post(self):
+        """
+        :param str car_number: required, length 1-6.
+        :param str description: required, length 1-1000.
+
+        - JWT required.
+        - **Admin only.**
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         current_user = get_jwt_identity()
         role = current_user['role']
         checkAdmin(role)
@@ -62,6 +70,15 @@ class NewIssue(Resource):
 class UpdateIssue(Resource):
     @jwt_required
     def put(self):
+        """
+        :param int issue_id: required.
+        :param str description: optional.
+        :param bool status: optional, solved = "true", unsolved = "false".
+
+        - JWT required.
+        - **Admin only.**
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
+        """
         current_user = get_jwt_identity()
         role = current_user['role']
         checkAdmin(role)
@@ -97,7 +114,9 @@ class AllIssues(Resource):
     @jwt_required
     def get(self):
         """
-        **Admin and Engineer access.**
+        - JWT required.
+        - **Admin/Engineer only.**
+        - Header: `\"Authorization\": \"Bearer {access_token}\"`
         """
         current_user = get_jwt_identity()
         role = current_user['role']
