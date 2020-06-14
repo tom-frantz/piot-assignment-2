@@ -3,9 +3,18 @@ Console screen for AP menu.
 """
 import sys
 import agent.facial_recognition.recogniser as recogniser
+from agent.qrcode_scanning.qrdecoder import QrDecoder
+from agent.qrcode_scanning.img_retriever import Cv2Image
+from agent.qrcode_scanning.img_retriever import FilePathException
+from agent.qrcode_scanning.img_retriever import FileTypeException
 import cv2
 import traceback
+import time
+import pexpect
+import bluetooth
 from datetime import datetime
+
+Global_max_scan_time = 60
 
 
 class Things:
@@ -33,7 +42,8 @@ class Things:
             "username": username,
             "password": password,
             "car_number": car_number,
-            "time": date,
+            "time": date
+
         }
         print(data)
         try:
@@ -46,7 +56,65 @@ class Things:
                 break
         print("Login token generated:", recv)
 
+    def qrcode_login(self, send_queue, recv_queue):
+        """login with a qrcode
+        
+        Allows individuals to login using a supplied QRCode.
+
+        :param str img_name: name of an image in images dir, required.
+        :param str car_number: id of car, required.
+        """
+        car_number = input("Please input car number: ")
+
+        # find qrcode and seperate data into username and password
+        img_name = input("Please input QrCode image name (in form image.png): ")
+        path = "agent/qrcode_scanning/images/"
+        try:
+            image = Cv2Image.read_image(path + img_name)
+        except FilePathException as e:
+            if e.code == 0:
+                print(f"Fatal Error Occured:\n{e.msg}\n{e.code}")
+            else:
+                print("Filename Error")
+            return
+        except FileTypeException as e:
+            print("Unsupported file type used")
+            return
+        
+        #data should be in form of "username:password"
+        decoder = QrDecoder()
+        decoded = decoder.decode_img(image)
+        qr_data_string = decoded.data.decode("utf-8")
+
+        SEPERAND = ':'
+        qr_data_list = qr_data_string.split(SEPERAND)
+        if len(qr_data_list) != 2:
+            # raise exception
+            raise ValueError("Qr Code data is in illegal form")
+        username = qr_data_list[0]
+        password = qr_data_list[1]
+
+        date = str(datetime.now())
+        data = {
+            "cmd": "login",
+            "username": username,
+            "password": password,
+            "car_number": car_number,
+            "time": date
+        }
+        # Send data
+        try:
+            send_queue.put(data)
+        except:
+            traceback.print_exc()
+        while 1:
+            recv = recv_queue.get()
+            if recv:
+                break
+        print("Login token generated:", recv)
+
     def facial_recog_login(self, send_queue, recv_queue):
+        return True
         recog = recogniser.Facialrecog()
         username = input("Enter username:")
         is_same_person = False
@@ -76,7 +144,7 @@ class Things:
         data = {
             "cmd": "unlock_car",
             "booking_number": booking_number,
-            "car_number": car_number,
+            "car_number": car_number
         }
         try:
             send_queue.put(data)
@@ -86,7 +154,6 @@ class Things:
             recv = recv_queue.get()
             if recv:
                 break
-        print("Car {} unlocked successfully.".format(data['car_number']))
 
     def return_car(self, send_queue, recv_queue):
         """
@@ -96,13 +163,11 @@ class Things:
         :param str car_number: required.
         """
         booking_number = input("Please iuput your booking number:")
-        print(booking_number)
         return_car_number = input("Please iuput your return car number:")
-        print(return_car_number)
         data = {
             "cmd": "return_car",
             "booking_number": booking_number,
-            "return_car_number": return_car_number,
+            "return_car_number": return_car_number
         }
         try:
             send_queue.put(data)
@@ -112,6 +177,44 @@ class Things:
             recv = recv_queue.get()
             if recv:
                 break
+
+
+    def search_bluetooth(self, send_queue, recv_queue):
+        child = pexpect.spawn("bluetoothctl")
+        child.send("scan on\n")
+        pre_input_mac = "2C:F0:EE:1F:E2:E5"
+        mac2 = "F0:18:98:00:F5:79"
+        start_time = time.time()
+        
+        try:
+            while True:
+                child.expect("Device (([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2}))")
+                bdaddr = child.match.group(1)
+                print(bdaddr)
+                bdaddr_str = bytes.decode(bdaddr)
+                if bdaddr_str == pre_input_mac or bdaddr_str == mac2:
+                    child.send("scan off\n")
+                    child.send("quit\n")
+                    print('has found the bluetooth')
+                    data = {
+                        "cmd":"search_bluetooth",
+                        "engineer_mac": bdaddr_str
+                    }
+                    try:
+                        send_queue.put(data)
+                    except:
+                        traceback.print_exc()
+                    while 1:
+                        recv = recv_queue.get()
+                        if recv:
+                            return True
+                past_time = time.time()-start_time
+                if past_time > Global_max_scan_time:
+                    print("not found any near engineer device.")
+                    return False
+        except KeyboardInterrupt:
+            child.close()
+            results.close()
 
 
 class Menu:
@@ -122,11 +225,14 @@ class Menu:
     def __init__(self):
         self.thing = Things()
         self.choices = {
+
             "1": self.thing.login,
             "2": self.thing.facial_recog_login,
             "3": self.thing.unlock_car,
             "4": self.thing.return_car,
-            "5": self.quit,
+            "5": self.thing.search_bluetooth,
+            "6": self.thing.qrcode_login,
+            "7": self.quit,
         }
 
     def display_menu(self):
@@ -137,7 +243,10 @@ class Menu:
                  2. Login with facial recognition
                  3. Unlock Car
                  4. Return Car
-                 5. Quit"""
+                 5. Search Bluetooth
+                 6. Login with QR Code
+                 7. Quit
+                 """
         )
 
     def run(self, send_queue, recv_queue):
@@ -159,7 +268,7 @@ class Menu:
             else:
                 print("{0} is not a valid choice".format(choice))
 
-    def quit(self):
+    def quit(self, send_queue, recv_queue):
         """
         Quit the menu.
         """
