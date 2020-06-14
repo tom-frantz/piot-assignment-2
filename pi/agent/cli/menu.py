@@ -3,6 +3,10 @@ Console screen for AP menu.
 """
 import sys
 import agent.facial_recognition.recogniser as recogniser
+from agent.qrcode_scanning.qrdecoder import QrDecoder
+from agent.qrcode_scanning.img_retriever import Cv2Image
+from agent.qrcode_scanning.img_retriever import FilePathException
+from agent.qrcode_scanning.img_retriever import FileTypeException
 import cv2
 import traceback
 from datetime import datetime
@@ -36,6 +40,63 @@ class Things:
             "time": date,
         }
         print(data)
+        try:
+            send_queue.put(data)
+        except:
+            traceback.print_exc()
+        while 1:
+            recv = recv_queue.get()
+            if recv:
+                break
+        print("Login token generated:", recv)
+
+    def qrcode_login(self, send_queue, recv_queue):
+        """login with a qrcode
+        
+        Allows individuals to login using a supplied QRCode.
+
+        :param str img_name: name of an image in images dir, required.
+        :param str car_number: id of car, required.
+        """
+        car_number = input("Please input car number: ")
+
+        # find qrcode and seperate data into username and password
+        img_name = input("Please input QrCode image name (in form image.png): ")
+        path = "agent/qrcode_scanning/images/"
+        try:
+            image = Cv2Image.read_image(path + img_name)
+        except FilePathException as e:
+            if e.code == 0:
+                print(f"Fatal Error Occured:\n{e.msg}\n{e.code}")
+            else:
+                print("Filename Error")
+            return
+        except FileTypeException as e:
+            print("Unsupported file type used")
+            return
+        
+        #data should be in form of "username:password"
+        decoder = QrDecoder()
+        decoded = decoder.decode_img(image)
+        qr_data_string = decoded.data.decode("utf-8")
+
+        SEPERAND = ':'
+        qr_data_list = qr_data_string.split(SEPERAND)
+        if len(qr_data_list) != 2:
+            # raise exception
+            raise ValueError("Qr Code data is in illegal form")
+        username = qr_data_list[0]
+        password = qr_data_list[1]
+
+        date = str(datetime.now())
+        data = {
+            "cmd": "login",
+            "username": username,
+            "password": password,
+            "car_number": car_number,
+            "time": date
+        }
+        # Send data
         try:
             send_queue.put(data)
         except:
@@ -124,9 +185,10 @@ class Menu:
         self.choices = {
             "1": self.thing.login,
             "2": self.thing.facial_recog_login,
-            "3": self.thing.unlock_car,
-            "4": self.thing.return_car,
-            "5": self.quit,
+            "3": self.thing.qrcode_login,
+            "4": self.thing.unlock_car,
+            "5": self.thing.return_car,
+            "6": self.quit,
         }
 
     def display_menu(self):
@@ -135,9 +197,10 @@ class Menu:
                  Operation Menu:
                  1. Login
                  2. Login with facial recognition
-                 3. Unlock Car
-                 4. Return Car
-                 5. Quit"""
+                 3. Login with QR Code
+                 4. Unlock Car
+                 5. Return Car
+                 6. Quit"""
         )
 
     def run(self, send_queue, recv_queue):
