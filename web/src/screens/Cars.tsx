@@ -1,123 +1,124 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Moment from "moment";
-import { Space, Table, Modal, DatePicker, Alert } from "antd";
+import { Button, message, Space, Table } from "antd";
 import { Car, formatCars, getColumnSearchProps, UnformattedCar } from "../utils/tableUtils";
-import ReactAddToCalendar from "react-add-to-calendar";
-
-const { RangePicker } = DatePicker;
+import api from "../utils/api";
+import BookingModal from "../containers/BookingModal";
+import ReportIssueModal from "../containers/ReportIssueModal";
+import UpdateCarModal from "../containers/UpdateCarModal";
+import ViewCarHistoryModal from "../containers/ViewCarHistoryModal";
 
 interface CarsProps {}
 
 const Cars: React.FC<CarsProps> = (props: CarsProps) => {
     const [cars, setCars] = useState<Car[]>([]);
-    const [visible, setVisible] = useState<boolean>(false);
-    const [error, setError] = useState<string | undefined>(undefined);
-    const [alert, setAlert] = useState<string | undefined>();
 
-    const [selectedRange, setSelectedRange] = useState<[Moment.Moment, Moment.Moment]>();
+    // Modal visibilities
+    const [bookingVisible, setBookingVisible] = useState<boolean>(false);
+    const [issuesVisible, setIssuesVisible] = useState<boolean>(false);
+    const [createCarVisible, setCreateCarVisible] = useState(false);
+    const [updateCarVisible, setUpdateCarVisible] = useState<boolean>(false);
+    const [carHistoryVisible, setCarHistoryVisible] = useState<boolean>(false);
+
+    const [loading, setLoading] = useState(false);
+
     const [selectedCar, setSelectedCar] = useState<Car | undefined>(undefined);
 
-    useEffect(() => {
-        axios.get("http://127.0.0.1:5000/cars/all").then((value: { data: UnformattedCar[] }) => {
+    const deleteCar = (record: Car) => {
+        axios
+            .delete(`http://${api}:5000/cars/delete/${record.car_number}`)
+            .then(() => {
+                message.success("Car was successfully deleted");
+                updateCars();
+            })
+            .catch((e) => {
+                console.error(e);
+            });
+    };
+
+    const updateCars = () => {
+        setLoading(true);
+        axios.get(`http://${api}:5000/cars/all`).then((value: { data: UnformattedCar[] }) => {
             setCars(value.data.map(formatCars));
+            setLoading(false);
         });
+    };
+
+    useEffect(() => {
+        updateCars();
     }, []);
 
     return (
         <div style={{ display: "flex", flexDirection: "column" }}>
-            <Modal
-                visible={visible}
-                onCancel={() => setVisible(false)}
-                onOk={() => {
-                    for (const booking of (selectedCar as Car).bookings) {
-                        if (
-                            Moment(booking.departure_time) <=
-                                (selectedRange as [Moment.Moment, Moment.Moment])[1] &&
-                            Moment(booking.return_time) >=
-                                (selectedRange as [Moment.Moment, Moment.Moment])[0]
-                        ) {
-                            setError("You can't use that date period");
-                            return;
-                        }
-                    }
-
-                    // console.log(
-                    //     (selectedRange as [Moment.Moment, Moment.Moment])[0].format("YYYY-MM-DD") +
-                    //         "/" +
-                    //         (selectedRange as [Moment.Moment, Moment.Moment])[1].format(
-                    //             "YYYY-MM-DD"
-                    //         )
-                    // );
+            <BookingModal
+                visible={bookingVisible}
+                setVisible={setBookingVisible}
+                onOk={updateCars}
+                car={selectedCar}
+            />
+            <ReportIssueModal
+                visible={issuesVisible}
+                setVisible={setIssuesVisible}
+                car={selectedCar}
+                onOk={updateCars}
+            />
+            <UpdateCarModal
+                visible={updateCarVisible}
+                setVisible={setUpdateCarVisible}
+                car={selectedCar}
+                onOk={(values) => {
+                    values.lock_status = values.lock_status === "True";
 
                     axios
-                        .post("http://127.0.0.1:5000/bookings/new", {
-                            car_number: (selectedCar as Car).car_number,
-                            booking_period:
-                                (selectedRange as [Moment.Moment, Moment.Moment])[0].format(
-                                    "YYYY-MM-DD"
-                                ) +
-                                "/" +
-                                (selectedRange as [Moment.Moment, Moment.Moment])[1].format(
-                                    "YYYY-MM-DD"
-                                ),
+                        .put(`http://${api}:5000/cars/update`, values)
+                        .then(() => {
+                            message.success(
+                                `The car "${values.car_number}" was successfully updated`
+                            );
+                            updateCars();
                         })
-                        .then((res) => setAlert(res.data.message))
-                        .catch((err) => setAlert(err.message));
-
-                    setVisible(false);
+                        .catch((error) => {
+                            message.error("There was an error with your request. Please try again");
+                            console.error(error);
+                        });
                 }}
+            />
+            <UpdateCarModal
+                visible={createCarVisible}
+                setVisible={setCreateCarVisible}
+                onOk={(values) => {
+                    values.lock_status = values.lock_status === "True";
+
+                    axios
+                        .post(`http://${api}:5000/cars/new`, values)
+                        .then(() => {
+                            message.success(
+                                `The car "${values.car_number}" was successfully created`
+                            );
+                            updateCars();
+                        })
+                        .catch((error) => {
+                            message.error("There was an error with your request. Please try again");
+                            console.error(error);
+                        });
+                }}
+            />
+            <ViewCarHistoryModal
+                visible={carHistoryVisible}
+                setVisible={setCarHistoryVisible}
+                car={selectedCar}
+            />
+
+            <Button
+                onClick={() => setCreateCarVisible(true)}
+                style={{ margin: 20 }}
+                type={"primary"}
             >
-                <RangePicker
-                    disabledDate={(current) => {
-                        for (const booking of (selectedCar as Car).bookings) {
-                            if (
-                                Moment(booking.departure_time) <= current &&
-                                current <= Moment(booking.return_time)
-                            ) {
-                                return true;
-                            }
-                        }
-                        // Can not select days before today and today
-                        return current && current < Moment().endOf("day");
-                    }}
-                    value={selectedRange}
-                    onChange={(values) => {
-                        console.log(values);
-                        setError(undefined);
-                        // @ts-ignore
-                        setSelectedRange(values);
-                    }}
-                />
-                {error && <p style={{ color: "#F00" }}>{error}</p>}
-            </Modal>
-            {alert && (
-                <Alert
-                    type="warning"
-                    closable
-                    onClose={() => {}}
-                    message={
-                        <div>
-                            <p>Your booking has been added</p>
-                            <ReactAddToCalendar
-                                event={{
-                                    title: "Car Booking",
-                                    startTime: (selectedRange as [
-                                        Moment.Moment,
-                                        Moment.Moment
-                                    ])[0].toISOString(),
-                                    endTime: (selectedRange as [
-                                        Moment.Moment,
-                                        Moment.Moment
-                                    ])[1].toISOString(),
-                                    description: "Your booking time.",
-                                }}
-                            />
-                        </div>
-                    }
-                />
-            )}
+                Create New Car
+            </Button>
+
             <Table
+                loading={loading}
                 dataSource={cars}
                 columns={[
                     {
@@ -160,18 +161,51 @@ const Cars: React.FC<CarsProps> = (props: CarsProps) => {
                         title: "Actions",
                         key: "actions",
                         render: (text, record) => {
-                            console.log(text, record);
-
                             return (
                                 <Space>
-                                    <a
-                                        onClick={() => {
-                                            setVisible(true);
-                                            setSelectedCar(record);
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            marginRight: 20,
+                                            flexDirection: "column",
                                         }}
                                     >
-                                        Book
-                                    </a>
+                                        <a
+                                            onClick={() => {
+                                                setSelectedCar(record);
+                                                setBookingVisible(true);
+                                            }}
+                                        >
+                                            Book
+                                        </a>
+                                        <a
+                                            onClick={() => {
+                                                setSelectedCar(record);
+                                                setIssuesVisible(true);
+                                            }}
+                                        >
+                                            Report Issue
+                                        </a>
+                                        <a
+                                            onClick={() => {
+                                                setSelectedCar(record);
+                                                setCarHistoryVisible(true);
+                                            }}
+                                        >
+                                            See Bookings
+                                        </a>
+                                    </div>
+                                    <div style={{ display: "flex", flexDirection: "column" }}>
+                                        <a
+                                            onClick={() => {
+                                                setSelectedCar(record);
+                                                setUpdateCarVisible(true);
+                                            }}
+                                        >
+                                            Update Details
+                                        </a>
+                                        <a onClick={() => deleteCar(record)}>Delete</a>
+                                    </div>
                                 </Space>
                             );
                         },

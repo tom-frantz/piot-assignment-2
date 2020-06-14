@@ -1,5 +1,5 @@
 """
-RESTful API Routes: `/auth/{endpoint}`
+RESTful API Routes: `/access_token/{endpoint}`
 """
 
 from flask_restful import reqparse, abort, Resource, inputs

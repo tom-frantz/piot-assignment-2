@@ -19,9 +19,7 @@ parser_new = reqparse.RequestParser(bundle_errors=True)
 parser_new.add_argument(
     'car_number', type=inputs.regex(r'^[A-Za-z0-9]{1,6}$'), required=True
 )
-parser_new.add_argument(
-    'description', type=inputs.regex(r'^[A-Za-z0-9-_ ]{1,1000}$'), required=True
-)
+parser_new.add_argument('description', type=inputs.regex(r'(.*?)'), required=True)
 
 parser_update = reqparse.RequestParser(bundle_errors=True)
 parser_update.add_argument('issue_id', type=inputs.positive, required=True)

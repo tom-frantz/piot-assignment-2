@@ -1,23 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { GoogleApiWrapper, Map, Marker, Circle, InfoWindow } from "google-maps-react";
+import { Car, formatCars, Issue, UnformattedCar } from "../utils/tableUtils";
 import axios from "axios";
-import { Car, formatCars, UnformattedCar } from "../utils/tableUtils";
+import { GoogleApiWrapper, InfoWindow, Map, Marker } from "google-maps-react";
+import api from "../utils/api";
+import { Auth } from "../App";
 
-interface MapProps {
+interface IssuesProps {
     google: any;
+    auth: Auth;
 }
 
-const MyMap: React.FC<MapProps> = (props: MapProps) => {
+const Issues: React.FC<IssuesProps> = (props: IssuesProps) => {
+    const { auth } = props;
     const [cars, setCars] = useState<Car[]>([]);
 
     const [activeMarker, setActiveMarker] = useState(undefined);
     const [activeCar, setActiveCar] = useState<Car | undefined>(undefined);
 
     useEffect(() => {
-        axios.get("http://127.0.0.1:5000/cars/all").then((value: { data: UnformattedCar[] }) => {
-            setCars(value.data.map(formatCars));
-        });
-    }, []);
+        if (auth)
+            axios.get(`http://${api}:5000/issues/all`).then((value: { data: UnformattedCar[] }) => {
+                console.log("Issues", value);
+                setCars(value.data.map(formatCars));
+            });
+    }, [auth]);
 
     return (
         <Map
@@ -30,6 +36,13 @@ const MyMap: React.FC<MapProps> = (props: MapProps) => {
             }}
         >
             {cars.map((car: Car) => {
+                console.log(
+                    car.issues.reduce(
+                        (previousValue, currentValue) =>
+                            previousValue + " & " + currentValue.description,
+                        ""
+                    )
+                );
                 return (
                     <Marker
                         // @ts-ignore
@@ -50,10 +63,15 @@ const MyMap: React.FC<MapProps> = (props: MapProps) => {
                     setActiveMarker(undefined);
                 }}
             >
-                <div>{activeCar && <h4>{activeCar.car_number}</h4>}</div>
+                <div>
+                    {activeCar && <h4>{activeCar.car_number}</h4>}
+                    {activeCar?.issues.map((currentValue) => (
+                        <p>{" - " + currentValue.description}</p>
+                    ))}
+                </div>
             </InfoWindow>
         </Map>
     );
 };
 
-export default GoogleApiWrapper({ apiKey: "AIzaSyA251T6B4lBT15MrIlRF4wDAeWe4wnyKgA" })(MyMap);
+export default GoogleApiWrapper({ apiKey: "AIzaSyA251T6B4lBT15MrIlRF4wDAeWe4wnyKgA" })(Issues);

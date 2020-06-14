@@ -43,7 +43,11 @@ def checkStaff(role):
     A help method to verify if the user is an engineer or admin.
     """
 
-    if role.lower() == "admin" or role.lower == "manager" or role.lower == "engineer":
+    if (
+        role.lower() == "admin"
+        or role.lower() == "manager"
+        or role.lower() == "engineer"
+    ):
         pass
     else:
         abort(403, message="Not authorised staff account.")
